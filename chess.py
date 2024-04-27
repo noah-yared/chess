@@ -1,19 +1,22 @@
 import math
 import pygame
 
-# Current Objectives:
-# ---------------------------------
+# Objectives:
+# --------------------------------------------------------------------------------------------------------------------------------------
 # Complete in_check function ------ IMPLEMENTED! NOT TESTED YET!
-# Complete checkmate function ------ IN PROGRESS! ISSUE: FIND EFFICIENT SOLUTION TO DICTIONARY MUTABILITY
-# Code stalemate function 
-# Code king-side/queen-side castle
-# Code pawn double-step
-# Code enpassant
-# Transfer to C++ (if slow)
-# Optimize 
-# Implement with pygame/sfml/sdl
+# Complete checkmate function ------ IMPLEMENTED! NOT TESTED YET! RESORTED TO COPYING DICTIONARIES FOR EACH ITERATION
+# Code stalemate function ------ IMPLEMENTED! NOT TESTED YET! ALSO ADDED SOME GAMEOVER LOGIC FOR CHECKMATE AND STALEMATE
+# Review my possible_moves function ------ TODO
+# Code king-side/queen-side castle ------ TODO
+# Code pawn double-step ------ TODO
+# Code enpassant ------- TODO
+# Optimize and transfer to C++ (if too slow) ------ TODO
+# Implement with pygame/sfml/sdl ------ TODO
+# Add AI opponent using minimax and alpha-beta pruning ------ TODO
+# Add Flask SQL backend to add puzzle database ------ TODO
+# Use Python sockets to add online multiplayer feature ------ TODO
 
-# Some helper functions -- LIKELY NOT NEEDED:
+# Some helper functions -- LIKELY NOT NEEDED (other than squares_between):
 
 def in_board(position):
     return position[0]>=0 and position[0]<8 and position[1]>=0  and position[1]<8
@@ -247,13 +250,18 @@ class game():
     
     def __init__(self):
         self.board = Board()
-        self.white = True
         self.white_king = (3,0)
         self.black_king = (3,7)
         self.Player1 = Player("white")
         self.Player2 = Player("black")
         self.current_player = self.Player1
         self.moves = 0
+        self.game_over = False
+
+    def play_game(self):
+        while not self.game_over: self.move()
+
+        self.game_over()
 
     def get_current_player(self):
         return "white" if self.white else "black"
@@ -267,10 +275,7 @@ class game():
             line2 = input().split()
         move = (int(x) for x in line1), (int(y) for y in line2)
         if self.current_player.make_move(move):
-            if not self.white:
-                self.current_player = self.Player2
-            else:
-                self.current_player = self.Player1
+            self.current_player = self.Player2 if self.current_player == self.Player1 else self.Player1
 
     def in_check(self, color, king, pieces=None):
         """
@@ -430,12 +435,13 @@ class game():
                     if piece.check_move((loc, square)):
                         defenses.append((loc, square))
 
+            nono_squares = defensive_squares[:-1]
             defenses.extend([(x+dx, y+dy)
                              for dx in range(-1,2)
                              for dy in range(-1,2)
                              if in_board(x+dx, y+dy) and 
                              (x+dx,y+dy) not in same_side and
-                             (x+dx, y+dy) not in defensive_squares] )
+                             (x+dx, y+dy) not in nono_squares[-1]])
 
         return defenses
 
@@ -444,14 +450,25 @@ class game():
         same_side, opposing = white, black if color == "white" else opposing, same_side
 
         for move in defenses:
-            same_side[move[1]] = same_side[move[0]].pop()
-            opposing.pop(move[1], None)
-            if self.in_check(color, king, (same_side, opposing)):
-                NotImplemented
+            if isinstance(same_side[move[0]], King()): king = move[1] # update king position if king is moving
+            new_same_side, new_opposing = self.simulate_move(same_side, opposing, move)
+            if not self.in_check(color, king, (new_same_side, new_opposing)):
+                return False
+        return True
 
 
-    def stale_mate(self, white):
-        raise NotImplementedError #TODO
+    def stalemate(self, color, king):
+        white, black = self.board.white_pieces, self.board.black_pieces
+        same_side, opposing = white, black if color == "white" else opposing, same_side
+
+        for loc in same_side:
+            piece = same_side[loc]
+            if isinstance(piece, King()): king = dest # update king position if king is moving
+            for dest in piece.get_possible_moves():
+                new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, dest))
+                if not self.in_check(color, king, (new_same_side, new_opposing)):
+                    return False       
+        return True
     
     def game_over(self):
         raise NotImplementedError #TODO
@@ -466,9 +483,18 @@ class game():
     def get_valid_moves(self, piece, location):
         raise NotImplementedError #TODO
 
-    def make_move(self, location, destination, color):
-        raise NotImplementedError #TODO
-    
+    def simulate_move(self, same_side, opposing, move):
+        same_side_copy = {key:val 
+                          if key != move[1] 
+                          else same_side[move[0]] 
+                          for key, val in same_side.items() 
+                          if key != move[0]}
+        opposing_copy = {key:val 
+                         for key, val in opposing.items()
+                         if key != move[1]}
+        
+        return same_side_copy, opposing_copy
+
     def promotion(self):
         raise NotImplementedError #TODO
 
@@ -485,18 +511,22 @@ class White(Player):
             if self.board[curr].check_move(move):
                 king_position = dest if isinstance(self.board[curr], King())\
                       else self.white_king
-                if check: # make sure white king escapes check
+                if self.check: # make sure white king escapes check
                     if self.in_check("white", king_position):
                         return False
                 self.board.update_board(move)
                 self.white_king = king_position
                 if self.in_check("black", self.black_king):
-                    check = True
+                    self.check = True
                     possible_defenses = self.defend("black", self.black_king)
                     if self.checkmate("black", possible_defenses):
-                        self.game_over()
-                elif self.stale_mate():
-                    self.game_over()
+                        self.game_over = "Checkmate"
+                        return False
+                elif self.stalemate():
+                    self.game_over = "Stalemate"
+                    return False
+                self.check = False
+                return True
   
 
 class Black(Player):
@@ -506,24 +536,34 @@ class Black(Player):
             if self.board[curr].check_move(move):
                 king_position = dest if isinstance(self.board[curr], King())\
                       else self.black_king
-                if check: # make sure white king escapes check
+                if self.check: # make sure black king escapes check
                     if self.in_check("black", king_position):
                         return False
                 self.board.update_board(move)
                 self.black_king = king_position
                 if self.in_check("white", self.white_king):
-                    check = True
+                    self.check = True
                     possible_defenses = self.defend("white", self.white_king)
                     if not possible_defenses or self.checkmate("white", self.white_king, possible_defenses):
-                        self.game_over()
+                        self.game_over = "Checkmate"
+                        return False
                 elif self.stalemate():
-                    self.game_over()
+                    self.game_over = "Stalemate"
+                    return False  
+                return True
 
 
-class AI:
-    """
-    Implement Minimax/Alpha-Beta pruning for AI opponent
-    """
+# class AI:
+#     """
+#     Implement Minimax/Alpha-Beta pruning for AI opponent
+#     """
     
-    raise NotImplementedError # TODO
+#     raise NotImplementedError # TODO
     
+
+
+if __name__ == "__main__":
+    """
+    Run Game Here
+    """
+    pass
