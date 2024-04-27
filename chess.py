@@ -4,8 +4,8 @@ import pygame
 # Current Objectives:
 # ---------------------------------
 # Complete in_check function ------ IMPLEMENTED! NOT TESTED YET!
-# Complete checkmate function
-# Code stalemate function
+# Complete checkmate function ------ IN PROGRESS! ISSUE: FIND EFFICIENT SOLUTION TO DICTIONARY MUTABILITY
+# Code stalemate function 
 # Code king-side/queen-side castle
 # Code pawn double-step
 # Code enpassant
@@ -24,6 +24,28 @@ def on_edge(self):
 def corner(self):
     return self.position[0], self.position[1] in {(0,0), (0,7), (7,0), (7,7)}
 
+def squares_between(loc1, loc2):
+    x1, y1 = loc1; x2, y2 = loc2
+    dx, dy = x2-x1, y2-y1
+
+    if dx == 0:
+        if dy > 0:
+            return [(x1, y1+d+1) for d in range(dy)]
+        return [(x1, y1-d-1) for d in range(-dy)]
+    elif dy == 0:
+        if dx > 0:
+            return [(x1+d+1, y1) for d in range(dx)]
+        return [(x1-d-1, y1) for d in range(-dx)]
+    else:
+        diff = math.abs(dx)
+        if dx>0 and dy>0:
+            return [(x1+d+1, y1+d+1) for d in range(diff)]
+        elif dx>0:
+            return [(x1+d+1, y1-d-1) for d in range(diff)]
+        elif dy>0:
+            return [(x1-d-1, y1+d+1) for d in range(diff)]
+        return [(x1-d-1, y1-d-1) for d in range(diff)]
+
 
 class Board():
     """
@@ -31,13 +53,14 @@ class Board():
     Move has already been validated. 
     """
     def __init__(self):
-        self.white_pieces = {(i,1):Pawn() for i in range(8)} | \
-                        {
-                            (0,0):Rook(), (7,0):Rook(),
-                            (1,0):Knight(), (6,0):Knight(),
-                            (2,0):Bishop(),(5,0):Bishop(),
-                            (3,0):King(), (4,0):Queen()
-                        }
+        self.white_pieces = \
+            {(i,1):Pawn() for i in range(8)} | \
+            {
+                (0,0):Rook(), (7,0):Rook(),
+                (1,0):Knight(), (6,0):Knight(),
+                (2,0):Bishop(),(5,0):Bishop(),
+                (3,0):King(), (4,0):Queen()
+            }
         self.black_pieces = \
             {(j,6):Pawn() for j in range(8)} | \
             {
@@ -249,14 +272,18 @@ class game():
             else:
                 self.current_player = self.Player1
 
-    def in_check(self, color, king):
+    def in_check(self, color, king, pieces=None):
         """
         Takes current board state, move that is attempted
         Returns boolean indicating whether [color] king is in check
         """
         x,y = king
-        white, black = self.board.white_pieces, self.board.black_pieces
-        same_side, opposing = white, black if color == "white" else black, white
+        if pieces is None: 
+            white, black = self.board.white_pieces, self.board.black_pieces
+            same_side, opposing = white, black if color == "white" else black, white
+        else:
+            same_side, opposing = pieces
+        self.danger = None # checking piece
            
     # vertical axis:
         col, row = x,y+1
@@ -265,6 +292,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Rook(), Queen())): 
+                    self.danger = col, row
                     return True
             row+=1
         
@@ -274,6 +302,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col, row)], (Rook(), Queen())):
+                    self.danger = col, row
                     return True
             row-=1
 
@@ -284,7 +313,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Rook(), Queen())):
-                    return True
+                    self.danger = col, row
             col+=1
         
         col, row = x-1, y
@@ -293,6 +322,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Rook(), Queen())):
+                    self.danger = col, row
                     return True
             col-=1
         
@@ -302,6 +332,7 @@ class game():
         # quick pawn check:
         if (col, row) in opposing:
             if isinstance(opposing[(col, row)], Pawn()):
+                self.danger = col, row
                 return True
 
         while col>=0 and row<8:
@@ -309,6 +340,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                    self.danger = col, row
                     return True
             col-=1; row+=1
         
@@ -318,6 +350,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                    self.danger = col, row
                     return True
             col+=1; row-=1
 
@@ -327,6 +360,7 @@ class game():
         # quick pawn check:
         if (col, row) in opposing:
             if isinstance(opposing[(col, row)], Pawn()):
+                self.danger = col,row
                 return True
             
         while col<8 and row<8:
@@ -334,6 +368,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                    self.danger = col, row
                     return True
             col+=1; row+=1
 
@@ -342,6 +377,7 @@ class game():
                 break
             if (col, row) in opposing:
                 if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                    self.danger = col, row
                     return True
             col-=1; row-=1
 
@@ -352,22 +388,67 @@ class game():
             dx, dy = dp
             if (x+dx, y+dy) in opposing:
                 if isinstance(opposing[(x+dx, y+dy)], Knight()):
+                    self.danger = x+dx, y+dy
                     return True
             if (x+dy, y+dx) in opposing:
                 if isinstance(opposing[(x+dy, y+dx)], Knight()):
+                    self.danger = x+dx, y+dy
                     return True
         
         return False
             
 
     # call function if in_check returns true
-    def checkmate(self, color, king_pos):
-        """
-        Takes in current state of board with [color] king in check
-        Returns boolean indicating whether [color] king is in checkmate
-        If true, game is over. 
-        """
-        raise NotImplementedError #TODO
+    def defend(self, color, king):
+        # """
+        # Takes in current state of board with [color] king in check
+        # Returns boolean indicating whether [color] king is in checkmate
+        # If true, game is over. 
+        # """
+        white, black = self.board.white_pieces, self.board.black_pieces
+        same_side, opposing = white, black if color == "white" else opposing, same_side
+        x,y = self.danger
+
+        defenses = [] # possible moves to defend king & defuse attack
+        defensive_squares = None
+        if isinstance(opposing[self.danger], Knight()):
+            for loc in same_side:
+                if same_side[loc].check_move((loc, self.danger)) and loc != king:
+                    defenses.append((loc, self.danger))
+
+            defenses.extend([(x+dx, y+dy) 
+                             for dx in range(-1,2) 
+                             for dy in range(-1,2) 
+                             if in_board(x+dx, y+dy) and 
+                             (x+dx,y+dy) not in same_side and
+                             not Knight().check_move(self.danger, (x+dx, y+dy))])
+        else:
+            defensive_squares = squares_between(king, self.danger)
+            for loc in same_side:
+                piece = same_side[loc]
+                for square in defensive_squares:
+                    if piece.check_move((loc, square)):
+                        defenses.append((loc, square))
+
+            defenses.extend([(x+dx, y+dy)
+                             for dx in range(-1,2)
+                             for dy in range(-1,2)
+                             if in_board(x+dx, y+dy) and 
+                             (x+dx,y+dy) not in same_side and
+                             (x+dx, y+dy) not in defensive_squares] )
+
+        return defenses
+
+    def checkmate(self, color, king, defenses):
+        white, black = self.board.white_pieces, self.board.black_pieces
+        same_side, opposing = white, black if color == "white" else opposing, same_side
+
+        for move in defenses:
+            same_side[move[1]] = same_side[move[0]].pop()
+            opposing.pop(move[1], None)
+            if self.in_check(color, king, (same_side, opposing)):
+                NotImplemented
+
 
     def stale_mate(self, white):
         raise NotImplementedError #TODO
@@ -411,8 +492,11 @@ class White(Player):
                 self.white_king = king_position
                 if self.in_check("black", self.black_king):
                     check = True
-                    if self.checkmate("black", self.black_king):
+                    possible_defenses = self.defend("black", self.black_king)
+                    if self.checkmate("black", possible_defenses):
                         self.game_over()
+                elif self.stale_mate():
+                    self.game_over()
   
 
 class Black(Player):
@@ -429,7 +513,8 @@ class Black(Player):
                 self.black_king = king_position
                 if self.in_check("white", self.white_king):
                     check = True
-                    if self.checkmate("white", self.white_king):
+                    possible_defenses = self.defend("white", self.white_king)
+                    if not possible_defenses or self.checkmate("white", self.white_king, possible_defenses):
                         self.game_over()
                 elif self.stalemate():
                     self.game_over()
