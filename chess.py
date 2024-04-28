@@ -77,11 +77,15 @@ class Board():
     def get_board(self):
         return self.board
 
-    def update_board(self, move):
+    def update_board(self, white, move):
         """
         Move piece from original_location to final_location 
         """
-        self.board[self.get_final_location()] = self.board.pop(self.get_original_location())
+        white, black = self.board.white_pieces, self.board.black_pieces
+        same_side, opposing = white, black if white else black, white
+        
+        same_side[move[1]] = same_side.pop(move[0])
+        opposing.pop(move[1], None)
 
     def get_board(self):
         return self.board
@@ -95,9 +99,8 @@ class Board():
 
 class Piece():
 
-    def __init__(self, board = None):
-        if board is not None: 
-            self.occupied = Board(board).get_occupied_squares() # DONT KNOW IF NEEDED - REMOVE IF NECESSARY                             
+    def __init__(self):
+        raise NotImplementedError                       
     
     def get_color(self):
         return self.color    
@@ -116,7 +119,7 @@ class Piece():
     def get_y(self):
         return self.pos[1]
 
-class Pawn(Piece):
+class Pawn():
 
     def check_move(self, move):
         x1, y1 = move[0]
@@ -125,7 +128,7 @@ class Pawn(Piece):
     def get_possible_moves(self):
         x,y = self.get_x(), self.get_y()
         
-class Rook(Piece):
+class Rook():
 
     def check_move(self, move):
         x1, y1 = move[0]
@@ -163,15 +166,16 @@ class Rook(Piece):
 
         return moves
 
-class Knight(Piece):
+class Knight():
     
-    def check_move(self, move, board):
+    def check_move(self, move):
         x1, y1 = move[0]
         x2, y2 = move[1]
 
-        if (math.abs(x2-x1), math.abs(y2-y1)) == (1,2) or \
-            (math.abs(x2-x1), math.abs(y2-y1)) == (2,1):
+        if (abs(x2-x1), abs(y2-y1)) == (1,2) or \
+            (abs(x2-x1), abs(y2-y1)) == (2,1):
             return True
+        return False
 
     def get_possible_moves(self):
         x,y  = self.get_x(), self.get_y()
@@ -181,13 +185,13 @@ class Knight(Piece):
                     {(x+i, y+j) for i in {-2, 2} for j in {-1,1}\
                      if in_board(x+i,y+j)})
 
-class Bishop(Piece):
+class Bishop():
 
     def check_move(self, move):
         x1, y1 = move[0]
         x2, y2 = move[1]
 
-        return True if math.abs(x2-x1) == math.abs(y2-y1) else False
+        return True if abs(x2-x1) == abs(y2-y1) else False
 
     def get_possible_moves(self):
         x,y = self.get_x(), self.get_y()
@@ -219,27 +223,26 @@ class Bishop(Piece):
 
         return moves
 
-class King(Piece):
+class King():
     
     def check_move(self, move):
         x1, y1 = move[0]
         x2, y2 = move[1]
 
-        if math.abs(x1-x2) <= 1 and math.abs(y2-y1) <= 1:
-            # if not in_check(): #TODO
-                return True
+        if abs(x1-x2) <= 1 and abs(y2-y1) <= 1:
+            return True
         return False
     def get_possible_moves(self):
         return {(x,y) for x in range(max(0,self.get_x()-1), min(8, self.get_x()+2))
                 for y in range(max(0,self.get_y()-1), min(8, self.get_y()+2))} - {self.pos}
 
-class Queen(Piece):
+class Queen():
     
     def check_move(self, move):
         x1, y1 = move[0]
         x2, y2 = move[1] 
 
-        if x1 == x2 or y1 == y2 or math.abs(x2-x1) == math.abs(y2-y1):
+        if x1 == x2 or y1 == y2 or abs(x2-x1) == abs(y2-y1):
             return True
         return False
 
@@ -508,13 +511,13 @@ class White(Player):
     def make_move(self, move):
         curr, dest = move
         if curr != dest and self.in_range(dest) and curr in self.board.white_pieces:
-            if self.board[curr].check_move(move):
+            if self.board.white_pieces[curr].check_move(move):
                 king_position = dest if isinstance(self.board[curr], King())\
                       else self.white_king
                 if self.check: # make sure white king escapes check
                     if self.in_check("white", king_position):
                         return False
-                self.board.update_board(move)
+                self.board.update_board(True, move)
                 self.white_king = king_position
                 if self.in_check("black", self.black_king):
                     self.check = True
@@ -533,13 +536,13 @@ class Black(Player):
     def make_move(self, move):
         curr, dest = move
         if curr != dest and self.in_range(dest) and curr in self.board.black_pieces:
-            if self.board[curr].check_move(move):
+            if self.board.black_pieces[curr].check_move(move):
                 king_position = dest if isinstance(self.board[curr], King())\
                       else self.black_king
                 if self.check: # make sure black king escapes check
                     if self.in_check("black", king_position):
                         return False
-                self.board.update_board(move)
+                self.board.update_board(False, move)
                 self.black_king = king_position
                 if self.in_check("white", self.white_king):
                     self.check = True
@@ -566,4 +569,3 @@ if __name__ == "__main__":
     """
     Run Game Here
     """
-    pass
