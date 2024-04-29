@@ -3,9 +3,10 @@ import pygame
 
 # Objectives:
 # --------------------------------------------------------------------------------------------------------------------------------------
-# Complete in_check function ------ IMPLEMENTED! NOT TESTED YET!
-# Complete checkmate function ------ IMPLEMENTED! NOT TESTED YET! RESORTED TO COPYING DICTIONARIES FOR EACH ITERATION
-# Code stalemate function ------ IMPLEMENTED! NOT TESTED YET! ALSO ADDED SOME GAMEOVER LOGIC FOR CHECKMATE AND STALEMATE
+# 
+# Complete in_check function ------ IMPLEMENTED! TESTING!
+# Complete checkmate function ------ IMPLEMENTED! TESTING! (RESORTED TO COPYING DICTIONARIES FOR EACH ITERATION)
+# Code stalemate function ------ IMPLEMENTED! NOT TESTED YET!
 # Review my possible_moves function ------ TODO
 # Code king-side/queen-side castle ------ TODO
 # Code pawn double-step ------ TODO
@@ -40,7 +41,7 @@ def squares_between(loc1, loc2):
             return [(x1+d+1, y1) for d in range(dx)]
         return [(x1-d-1, y1) for d in range(-dx)]
     else:
-        diff = math.abs(dx)
+        diff = abs(dx)
         if dx>0 and dy>0:
             return [(x1+d+1, y1+d+1) for d in range(diff)]
         elif dx>0:
@@ -73,22 +74,25 @@ class Board():
                 (3,7):King(), (4,7):Queen()
             }
         
-        
-    def get_board(self):
-        return self.board
+    def set_board(self, white_pieces, black_pieces):
+        """
+        Used to generate different positions for testing
+        """
+        self.white_pieces = white_pieces
+        self.black_pieces = black_pieces
 
-    def update_board(self, white, move):
+    def update_board(self, is_white, move):
         """
         Move piece from original_location to final_location 
         """
         white, black = self.board.white_pieces, self.board.black_pieces
-        same_side, opposing = white, black if white else black, white
+        same_side, opposing = white, black if is_white else black, white
         
         same_side[move[1]] = same_side.pop(move[0])
         opposing.pop(move[1], None)
 
     def get_board(self):
-        return self.board
+        return self.white_pieces, self.black_pieces
         
     def get_occupied_squares(self):
         occupied_squares = set()
@@ -121,20 +125,35 @@ class Piece():
 
 class Pawn():
 
-    def check_move(self, move):
-        x1, y1 = move[0]
-        x2, y2 = move[1]
+    def check_move(self, color, move, left, forward, right):
+        x1,y1 = move[0]
+        x2,y2 = move[1]
+
+        dy, dx = (x2-x1, y2-y1) if color == "white" else (y1-y2, x1-x2)
+        if (dx,dy) == (-1,1) and left:
+            return True
+        elif (dx,dy) == (0,1) and forward:
+            return True
+        elif (dx,dy) == (1,1) and right:
+            return True
+        return False
 
     def get_possible_moves(self):
         x,y = self.get_x(), self.get_y()
         
 class Rook():
 
-    def check_move(self, move):
+    def check_move(self, move, pieces):
         x1, y1 = move[0]
         x2, y2 = move[1]
         
-        return True if x1==x2 or y1==y2 else False
+        if x1 == x2 or y1 == y2:
+            squares = squares_between(move[0], move[1])
+            for square in squares:
+                if square in pieces[0] or square in pieces[1]:
+                    return False
+            return True 
+        return False
 
     def get_possible_moves(self):
         x,y =  self.get_x(), self.get_y()
@@ -187,11 +206,17 @@ class Knight():
 
 class Bishop():
 
-    def check_move(self, move):
+    def check_move(self, move, pieces):
         x1, y1 = move[0]
         x2, y2 = move[1]
 
-        return True if abs(x2-x1) == abs(y2-y1) else False
+        if abs(x2-x1) == abs(y2-y1):
+            squares = squares_between(move[0], move[1])
+            for square in squares:
+                if square in pieces[0] or square in pieces[1]:
+                    return False
+            return True
+        return False
 
     def get_possible_moves(self):
         x,y = self.get_x(), self.get_y()
@@ -232,17 +257,22 @@ class King():
         if abs(x1-x2) <= 1 and abs(y2-y1) <= 1:
             return True
         return False
+    
     def get_possible_moves(self):
         return {(x,y) for x in range(max(0,self.get_x()-1), min(8, self.get_x()+2))
                 for y in range(max(0,self.get_y()-1), min(8, self.get_y()+2))} - {self.pos}
 
 class Queen():
     
-    def check_move(self, move):
+    def check_move(self, move, pieces):
         x1, y1 = move[0]
         x2, y2 = move[1] 
 
         if x1 == x2 or y1 == y2 or abs(x2-x1) == abs(y2-y1):
+            squares = squares_between(move[0], move[1])
+            for square in squares:
+                if square in pieces[0] or square in pieces[1]:
+                    return False
             return True
         return False
 
@@ -252,11 +282,11 @@ class Queen():
 class game():
     
     def __init__(self):
-        self.board = Board()
+        # self.board = Board()
         self.white_king = (3,0)
         self.black_king = (3,7)
-        self.Player1 = Player("white")
-        self.Player2 = Player("black")
+        self.Player1 = White()
+        self.Player2 = Black()
         self.current_player = self.Player1
         self.moves = 0
         self.game_over = False
@@ -288,9 +318,10 @@ class game():
         x,y = king
         if pieces is None: 
             white, black = self.board.white_pieces, self.board.black_pieces
-            same_side, opposing = white, black if color == "white" else black, white
+            same_side, opposing = (white, black) if color == "white" else (black, white)
         else:
-            same_side, opposing = pieces
+            white, black = pieces 
+            same_side, opposing = (white, black) if color == "white" else (black, white)
         self.danger = None # checking piece
            
     # vertical axis:
@@ -299,7 +330,7 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Rook(), Queen())): 
+                if isinstance(opposing[(col,row)], (Rook, Queen)): 
                     self.danger = col, row
                     return True
             row+=1
@@ -309,7 +340,7 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col, row)], (Rook(), Queen())):
+                if isinstance(opposing[(col, row)], (Rook, Queen)):
                     self.danger = col, row
                     return True
             row-=1
@@ -320,16 +351,17 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Rook(), Queen())):
+                if isinstance(opposing[(col,row)], (Rook, Queen)):
                     self.danger = col, row
+                    return True
             col+=1
         
-        col, row = x-1, y
+        col, row = (x-1, y)
         while col>=0:
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Rook(), Queen())):
+                if isinstance(opposing[(col,row)], (Rook, Queen)):
                     self.danger = col, row
                     return True
             col-=1
@@ -339,7 +371,7 @@ class game():
 
         # quick pawn check:
         if (col, row) in opposing:
-            if isinstance(opposing[(col, row)], Pawn()):
+            if isinstance(opposing[(col, row)], Pawn):
                 self.danger = col, row
                 return True
 
@@ -347,7 +379,7 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                if isinstance(opposing[(col,row)], (Bishop, Queen)):
                     self.danger = col, row
                     return True
             col-=1; row+=1
@@ -357,7 +389,7 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                if isinstance(opposing[(col,row)], (Bishop, Queen)):
                     self.danger = col, row
                     return True
             col+=1; row-=1
@@ -367,7 +399,7 @@ class game():
         
         # quick pawn check:
         if (col, row) in opposing:
-            if isinstance(opposing[(col, row)], Pawn()):
+            if isinstance(opposing[(col, row)], Pawn):
                 self.danger = col,row
                 return True
             
@@ -375,16 +407,17 @@ class game():
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                if isinstance(opposing[(col,row)], (Bishop, Queen)):
                     self.danger = col, row
                     return True
             col+=1; row+=1
 
+        col, row = x-1, y-1
         while col>=0 and row>=0:
             if (col, row) in same_side:
                 break
             if (col, row) in opposing:
-                if isinstance(opposing[(col,row)], (Bishop(), Queen())):
+                if isinstance(opposing[(col,row)], (Bishop, Queen)):
                     self.danger = col, row
                     return True
             col-=1; row-=1
@@ -395,74 +428,106 @@ class game():
         for dp in displacements:
             dx, dy = dp
             if (x+dx, y+dy) in opposing:
-                if isinstance(opposing[(x+dx, y+dy)], Knight()):
+                if isinstance(opposing[(x+dx, y+dy)], Knight):
                     self.danger = x+dx, y+dy
                     return True
             if (x+dy, y+dx) in opposing:
-                if isinstance(opposing[(x+dy, y+dx)], Knight()):
+                if isinstance(opposing[(x+dy, y+dx)], Knight):
                     self.danger = x+dx, y+dy
                     return True
         
         return False
-            
-
-    # call function if in_check returns true
-    def defend(self, color, king):
+    
+    
+    # call checkmate() if in_check() returns true
+    def checkmate(self, color, king, pieces = None):
         # """
         # Takes in current state of board with [color] king in check
         # Returns boolean indicating whether [color] king is in checkmate
         # If true, game is over. 
         # """
-        white, black = self.board.white_pieces, self.board.black_pieces
-        same_side, opposing = white, black if color == "white" else opposing, same_side
-        x,y = self.danger
+        if pieces is None:
+            white, black = self.board.white_pieces, self.board.black_pieces
+            same_side, opposing = (white, black) if color == "white" else (black, white)
+        else:
+            white, black = pieces
+            same_side, opposing = (white, black) if color == "white" else (black, white)
 
-        defenses = [] # possible moves to defend king & defuse attack
-        defensive_squares = None
-        if isinstance(opposing[self.danger], Knight()):
+        if isinstance(opposing[self.danger], Knight): # knight case: MOVE KING TO SAFETY or CAPTURE KNIGHT
+            for dx in range(-1,2):
+                for dy in range(-1,2):
+                    new_king = king[0]+dx, king[1]+dy
+                    if in_board(new_king) and \
+                        new_king not in same_side and \
+                            not Knight().check_move((self.danger, new_king)):
+                        new_same_side, new_opposing = self.simulate_move(same_side, opposing, (king, new_king))
+                        pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                        if not self.in_check(color, new_king, pieces):
+                            print(king, new_king)
+                            return False
             for loc in same_side:
-                if same_side[loc].check_move((loc, self.danger)) and loc != king:
-                    defenses.append((loc, self.danger))
+                if loc != king:
+                    piece = same_side[loc]
+                    if isinstance(piece, Pawn):
+                        if self.pawn_available_square(color, (loc, self.danger), (white, black)):
+                            new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
+                            pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                            if not self.in_check(color, king, pieces):
+                                print(loc, self.danger)
+                                return False
+                    elif isinstance(piece, Knight):
+                        if piece.check_move((loc,self.danger)):
+                            new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
+                            pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                            if not self.in_check(color, king, pieces):
+                                print(loc, self.danger)
+                                return False
+                    else:
+                        if piece.check_move((loc, self.danger),(white, black)):
+                            new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
+                            pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                            if not self.in_check(color, king, pieces):
+                                print(loc, self.danger)
+                                return False
 
-            defenses.extend([(x+dx, y+dy) 
-                             for dx in range(-1,2) 
-                             for dy in range(-1,2) 
-                             if in_board(x+dx, y+dy) and 
-                             (x+dx,y+dy) not in same_side and
-                             not Knight().check_move(self.danger, (x+dx, y+dy))])
         else:
             defensive_squares = squares_between(king, self.danger)
+            attacking_piece = opposing[self.danger]
+            for dx in range(-1,2):
+                for dy in range(-1,2):
+                    new_king = king[0]+dx, king[1]+dy
+                    if in_board(new_king) and \
+                        new_king not in same_side and \
+                            not attacking_piece.check_move((self.danger, new_king), (white, black)):
+                        new_same_side, new_opposing = self.simulate_move(same_side, opposing, (king, new_king))
+                        pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                        if not self.in_check(color, new_king, pieces):
+                            print(king, new_king)
+                            return False
             for loc in same_side:
-                piece = same_side[loc]
-                for square in defensive_squares:
-                    if piece.check_move((loc, square)):
-                        defenses.append((loc, square))
-
-            nono_squares = defensive_squares[:-1]
-            defenses.extend([(x+dx, y+dy)
-                             for dx in range(-1,2)
-                             for dy in range(-1,2)
-                             if in_board(x+dx, y+dy) and 
-                             (x+dx,y+dy) not in same_side and
-                             (x+dx, y+dy) not in nono_squares[-1]])
-
-        return defenses
-
-    def checkmate(self, color, king, defenses):
-        white, black = self.board.white_pieces, self.board.black_pieces
-        same_side, opposing = white, black if color == "white" else opposing, same_side
-
-        for move in defenses:
-            if isinstance(same_side[move[0]], King()): king = move[1] # update king position if king is moving
-            new_same_side, new_opposing = self.simulate_move(same_side, opposing, move)
-            if not self.in_check(color, king, (new_same_side, new_opposing)):
-                return False
+                if loc != king:
+                    piece = same_side[loc]
+                    for square in defensive_squares:
+                        if isinstance(piece, Pawn):
+                            if self.pawn_available_square(color, (loc, square), pieces):
+                                new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, square))
+                                pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                                if not self.in_check(color, king, pieces):
+                                    print(loc, square)
+                                    return False
+                        else:
+                            if piece.check_move((loc, square), (white, black)):
+                                new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, square))
+                                if loc == (5,7): print(new_same_side); print(new_opposing)
+                                pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                                if not self.in_check(color, king, pieces):
+                                    print(loc, square)
+                                    return False
         return True
-
 
     def stalemate(self, color, king):
         white, black = self.board.white_pieces, self.board.black_pieces
-        same_side, opposing = white, black if color == "white" else opposing, same_side
+        same_side, opposing = (white, black) if color == "white" else (black, white)
 
         for loc in same_side:
             piece = same_side[loc]
@@ -487,32 +552,51 @@ class game():
         raise NotImplementedError #TODO
 
     def simulate_move(self, same_side, opposing, move):
-        same_side_copy = {key:val 
-                          if key != move[1] 
-                          else same_side[move[0]] 
-                          for key, val in same_side.items() 
-                          if key != move[0]}
+        same_side_copy = {(move[1] if key == move[0] else key):val
+                          for key, val in same_side.items()}
         opposing_copy = {key:val 
                          for key, val in opposing.items()
                          if key != move[1]}
-        
+                
         return same_side_copy, opposing_copy
 
     def promotion(self):
         raise NotImplementedError #TODO
+    
+    def pawn_available_square(self, color, move, pieces):
+        if pieces is not None:
+            x,y = move[0]
+            white_pieces, black_pieces = pieces
+            forward = (x,y+1) not in black_pieces if color =="white" else (x,y+1) not in white_pieces
+            left_diagonal, right_diagonal = (x-1,y+1) in black_pieces, (x+1,y+1) in black_pieces
+            return Pawn().check_move(color, move, left_diagonal, forward, right_diagonal)
+        else:
+            x,y = move[0]
+            forward = (x,y+1) not in self.board.black_pieces if color=="white" else (x,y+1) not in self.board.white_pieces
+            left_diagonal, right_diagonal = (x-1,y+1) in self.board.black_pieces, (x+1,y+1) in self.board.black_pieces
+            return Pawn().check_move(color, move, left_diagonal, forward, right_diagonal)
 
 
-class Player(game):
+class Player():
 
     def make_move(self):
-        self.current_player.make_move()   
+        self.current_player.make_move()  
+
+    def pawn_available_square(self, white, move):
+        x,y = move[0]
+        forward = (x,y+1) not in self.board.black_pieces if white else (x,y+1) not in self.board.white_pieces
+        left_diagonal, right_diagonal = (x-1,y+1) in self.board.black_pieces, (x+1,y+1) in self.board.black_pieces
+        return Pawn().check_move(white, move, left_diagonal, forward, right_diagonal)
 
 class White(Player):
+    
     def make_move(self, move):
         curr, dest = move
-        if curr != dest and self.in_range(dest) and curr in self.board.white_pieces:
-            if self.board.white_pieces[curr].check_move(move):
-                king_position = dest if isinstance(self.board[curr], King())\
+        if curr != dest and self.in_range(dest) and curr in self.board.white_pieces and dest not in self.board.black_pieces:
+            piece = self.board.white_pieces[curr]
+            valid_move = self.pawn_available_square(True, move) if isinstance(piece, Pawn()) else piece.check_move()      
+            if valid_move:
+                king_position = dest if isinstance(piece, King())\
                       else self.white_king
                 if self.check: # make sure white king escapes check
                     if self.in_check("white", king_position):
@@ -535,8 +619,10 @@ class White(Player):
 class Black(Player):
     def make_move(self, move):
         curr, dest = move
-        if curr != dest and self.in_range(dest) and curr in self.board.black_pieces:
-            if self.board.black_pieces[curr].check_move(move):
+        if curr != dest and self.in_range(dest) and curr in self.board.black_pieces and dest not in self.board.black_pieces:
+            piece = self.board.black_pieces[curr]
+            valid_move = self.pawn_available_square(False, move) if isinstance(piece, Pawn()) else piece.check_move()      
+            if valid_move:
                 king_position = dest if isinstance(self.board[curr], King())\
                       else self.black_king
                 if self.check: # make sure black king escapes check
@@ -565,7 +651,7 @@ class Black(Player):
     
 
 
-if __name__ == "__main__":
-    """
-    Run Game Here
-    """
+# if __name__ == "__main__":
+#     """
+#     Run Game Here
+#     """
