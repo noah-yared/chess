@@ -533,11 +533,17 @@ class game():
 
         for loc in same_side:
             piece = same_side[loc]
-            if isinstance(piece, King()): king = dest # update king position if king is moving
-            for dest in piece.get_possible_moves():
-                new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, dest))
-                if not self.in_check(color, king, (new_same_side, new_opposing)):
-                    return False       
+            if isinstance(piece, King()): # king position will change
+                for dest in piece.get_possible_moves():
+                    new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, dest))
+                    if not self.in_check(color, dest, (new_same_side, new_opposing)):
+                        king = dest
+                        return False       
+            else:
+                for dest in piece.get_possible_moves():
+                    new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, dest))
+                    if not self.in_check(color, king, (new_same_side, new_opposing)):
+                        return False 
         return True
     
     def game_over(self):
