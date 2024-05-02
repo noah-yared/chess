@@ -148,9 +148,10 @@ class Rook():
         x2, y2 = move[1]
         
         if x1 == x2 or y1 == y2:
-            squares = squares_between(move[0], move[1])
+            squares = squares_between(move[0], move[1])[:-1]
             for square in squares:
                 if square in pieces[0] or square in pieces[1]:
+                    print(square)
                     return False
             return True 
         return False
@@ -211,7 +212,7 @@ class Bishop():
         x2, y2 = move[1]
 
         if abs(x2-x1) == abs(y2-y1):
-            squares = squares_between(move[0], move[1])
+            squares = squares_between(move[0], move[1])[:-1]
             for square in squares:
                 if square in pieces[0] or square in pieces[1]:
                     return False
@@ -269,7 +270,7 @@ class Queen():
         x2, y2 = move[1] 
 
         if x1 == x2 or y1 == y2 or abs(x2-x1) == abs(y2-y1):
-            squares = squares_between(move[0], move[1])
+            squares = squares_between(move[0], move[1])[:-1]
             for square in squares:
                 if square in pieces[0] or square in pieces[1]:
                     return False
@@ -463,7 +464,6 @@ class game():
                         new_same_side, new_opposing = self.simulate_move(same_side, opposing, (king, new_king))
                         pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                         if not self.in_check(color, new_king, pieces):
-                            print(king, new_king)
                             return False
             for loc in same_side:
                 if loc != king:
@@ -473,25 +473,23 @@ class game():
                             new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
                             pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                             if not self.in_check(color, king, pieces):
-                                print(loc, self.danger)
                                 return False
                     elif isinstance(piece, Knight):
                         if piece.check_move((loc,self.danger)):
                             new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
                             pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                             if not self.in_check(color, king, pieces):
-                                print(loc, self.danger)
                                 return False
                     else:
                         if piece.check_move((loc, self.danger),(white, black)):
                             new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, self.danger))
                             pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                             if not self.in_check(color, king, pieces):
-                                print(loc, self.danger)
                                 return False
 
         else:
             defensive_squares = squares_between(king, self.danger)
+            print("squares between",king, self.danger, defensive_squares)
             attacking_piece = opposing[self.danger]
             for dx in range(-1,2):
                 for dy in range(-1,2):
@@ -502,7 +500,6 @@ class game():
                         new_same_side, new_opposing = self.simulate_move(same_side, opposing, (king, new_king))
                         pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                         if not self.in_check(color, new_king, pieces):
-                            print(king, new_king)
                             return False
             for loc in same_side:
                 if loc != king:
@@ -513,15 +510,20 @@ class game():
                                 new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, square))
                                 pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                                 if not self.in_check(color, king, pieces):
-                                    print(loc, square)
                                     return False
-                        else:
-                            if piece.check_move((loc, square), (white, black)):
+                        elif isinstance(piece, Knight):
+                            if piece.check_move((loc, square)):
                                 new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, square))
-                                if loc == (5,7): print(new_same_side); print(new_opposing)
                                 pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
                                 if not self.in_check(color, king, pieces):
-                                    print(loc, square)
+                                    return False
+
+                        else:
+                            if isinstance(piece, Bishop) and square == (7,0): print(white, black)
+                            if piece.check_move((loc, square), (white, black)):
+                                new_same_side, new_opposing = self.simulate_move(same_side, opposing, (loc, square))
+                                pieces = (new_same_side, new_opposing) if color == "white" else (new_opposing, new_same_side)
+                                if not self.in_check(color, king, pieces):
                                     return False
         return True
 
