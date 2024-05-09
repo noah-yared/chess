@@ -1,15 +1,6 @@
-# REFACTOR CODEBASE:
+# CODE BASE REFACTORED!
 # ________________________________________
-# X ADD GET SAME_SIDE AND GET OPPOSING PIECES FUNCTION
-# X REDUCE COMPLEXITY OF UPDATE_MOVE() + THOROUGHLY TEST 
-# X CREATE ONE FUNCTION FOR ITERATING ALONG LINE ON BOARD:
-# (GREATLY REDUCES COMPLEXITY OF GET_POSSIBLE_MOVE() AND IN_CHECK())
-# X CREATE A SINGLE FUNCTION FOR ITERATION IN CHECKMATE() AND STALEMATE()
-# X ADD SIMULATED_MOVE_IN_CHECK FUNCTION
-# X ADD CAN_CAPTURE/CAN_LAND_ON OR CAN_BLOCK
-# X TRY TO INCORPORATE IF (CONDITION) CONTINUE CONTROL FLOWS
-# TO REDUCE INDENTATIONS AND MAKE CODEBASE MORE READABLE
-# X MAYBE ADD CHECK_PIECE_TYPE() FUNCTION (MAYBE NOT NECESSARY??)
+# X FIX GET_DIRECTION_OF_LINE() -- BUG FIXED!!!
 # __________________________________________
 # X MAKE SURE TO ADD CLEAR DOCSTRING/COMMENTS!!!
 #__________________________________________
@@ -41,7 +32,7 @@ class Pawn():
 			if position[0] == 6:
 				return True
 		else:
-			if position[1] == 1:
+			if position[0] == 1:
 				return True
 		return False
 
@@ -70,6 +61,13 @@ class Knight():
 
 	def get_color(self):
 		return self.color
+	
+	def possible_move(self, pieces, move):
+		if (abs(move[0][0]-move[1][0], abs(move[0][1]-move[1][1]))) not in {(1,2), (2,1)}:
+			return False
+		if not is_same_color(pieces, *move):
+			return True
+		return False
 
 class Rook():
 	def __init__(self, color):
@@ -77,6 +75,9 @@ class Rook():
 
 	def get_color(self):
 		return self.color
+	
+	def possible_move(self, pieces, move):
+		return has_line_of_sight(pieces, *move)
 
 class Bishop():
 	def __init__(self, color):
@@ -84,6 +85,9 @@ class Bishop():
 
 	def get_color(self):
 		return self.color
+	
+	def possible_move(self, pieces, move):
+		return has_line_of_sight(pieces, *move)
 
 class Queen():
 	def __init__(self, color):
@@ -91,12 +95,15 @@ class Queen():
 
 	def get_color(self):
 		return self.color
+	
+	def possible_move(self, pieces, move):
+		return has_line_of_sight(pieces, *move)
 
 class King():
 	def __init__(self, color):
 		self.color = color
 		self.danger = None
-		self.location = (4,7) if color == "white" else (4,0)
+		self.location = (7,4) if color == "white" else (0,4)
 		self.moved = False
 
 	def get_color(self):
@@ -142,6 +149,7 @@ def get_line_of_attack(king, attack):
 	while (r,c) != attack:
 		line_of_attack.append((r,c))
 		r+=dr; c+=dc
+	line_of_attack.append(attack)
 	
 	return line_of_attack
 
@@ -151,14 +159,14 @@ def is_same_color(pieces, square1, square2):
 	Returns: True if there are two pieces in each square with the same color, else False
 	"""
 	return square1 in pieces and square2 in pieces and\
-		pieces[square1].get_color() != pieces[square2].get_color()
+		pieces[square1].get_color() == pieces[square2].get_color()
 
 def has_straight_path(square1, square2):
 	"""
 	Parameter(s): Takes position of two pieces on board square1, square2
 	Returns: True if there is a straight path of squares between the two pieces, else False
 	"""
-	r1, c1, = square1
+	r1, c1 = square1
 	r2, c2 = square2
 	return (r1 == r2) or (c1 == c2) or \
 		abs(r1-r2) == abs(c1-c2)
@@ -178,14 +186,14 @@ def get_direction_of_line(square1, square2):
 		return (1,0) if r2>r1 else (-1,0)
 	elif r2 > r1:
 		return (1,1) if c2>c1 else (1,-1)
-	return (-1,1) if c2<c1 else (-1,-1)
+	return (-1,1) if c2>c1 else (-1,-1)
 
-def possible_move(pieces, move):
+def possible_step(pieces, move):
 	"""
-	Parameter(s): Takes current board state, move to be validated
+	Parameter(s): Takes current board state, move to be validated (ONLY TAKES QUEEN, BISHOP, ROOK)
 	Returns: True if step has valid step size for piece type
 	"""
-	return isinstance(pieces[move[0]], move_directions(get_direction_of_line(move)))	
+	return isinstance(pieces[move[0]], move_directions[get_direction_of_line(*move)]) if has_straight_path(*move) else False
 
 def has_line_of_sight(pieces, square1, square2):
 	"""
@@ -193,7 +201,7 @@ def has_line_of_sight(pieces, square1, square2):
 	Returns: True if there is no piece lying on the line of squares between 
 	square1 and square2, else False
   	"""
-	if not has_straight_path(square1, square2) or not possible_move(pieces, (square1, square2)): # CANNOT REACH
+	if not has_straight_path(square1, square2) or not possible_step(pieces, (square1, square2)): # CANNOT REACH
 		return False
 	dr, dc = get_direction_of_line(square1, square2)
 	r,c = square1
@@ -229,9 +237,9 @@ def simulate_move(pieces, move):
 	Returns: copy of board dictionary with move made
 	"""
 	return {
-		(loc if loc != move[0] else move[1]):piece 
-		for loc, piece in pieces.items() 
-		if loc != move[1]
+			(loc if loc != move[0] else move[1]):piece 
+			for loc, piece in pieces.items() 
+			if loc != move[1]
 		}
 
 def generate_knight_reachable_squares(square):
@@ -242,11 +250,11 @@ def generate_knight_reachable_squares(square):
 	"""
 	r,c = square
 	directions = [
-		(1,2),(-1,2),(1,-2),(-1,-2)
+		(1,2),(-1,2),(1,-2),(-1,-2),
 		(2,1),(-2,1),(2,-1),(-2,-1)
 	]
 	return [(r+dr, c+dc) for (dr,dc) in directions 
-				 if in_board(r+dr, c+dc)] 
+				 if in_board((r+dr, c+dc))] 
 
 def generate_pawn_attack_positions(pieces, king):
 	"""
@@ -255,14 +263,14 @@ def generate_pawn_attack_positions(pieces, king):
 	that attack the king
 	"""
 	r,c = king 
-	return [(r+1,c-1), (r+1,c-1)] \
+	return [(r-1,c+1), (r-1,c+1)] \
 		if pieces[king].get_color() == "white" \
 		else [(r-1,c-1), (r-1,c+1)]
 
 def is_king_attacked_by_knight(pieces, king, square):
 	"""
 	Parameter(s): Takes current board state, location of king, and 
-	square to be checkd
+	square to be checked
 	Returns: True if opposing knight at location square is attacking
 	king, else False
 	"""
@@ -483,7 +491,8 @@ def has_valid_knight_move_from_square(pieces, king, square):
 			return True
 	return False
 
-def has_valid_move_from_square_along_direction(pieces, king, square, directions):
+def has_valid_move_from_square_along_direction(pieces, king, square,
+											   directions):
 	"""
 	Parameter(s): Takes current board state, location of king, location of piece,
 	list of directions to check 
@@ -513,7 +522,8 @@ def has_valid_reachable_square_from_piece(pieces, king, square):
 		directions.extend([(-1,0),(1,0),(0,-1),(0,1)])
 	if isinstance(piece, (Bishop, Queen)):
 		directions.extend([(-1,1),(1,1),(1,-1),(-1,-1)])
-	return has_valid_move_from_square_along_direction(pieces, king, square, directions)
+	return has_valid_move_from_square_along_direction(pieces, king, square,
+													  directions)
 
 def stalemate(pieces, king):
 	"""
@@ -526,7 +536,6 @@ def stalemate(pieces, king):
 		return False
 	
 	# find any possible piece that can be moved on the kings side
-	# without putting king into check. 
 	for location in pieces:
 		if isinstance(pieces[location], King) or \
 			not is_same_color(pieces, king, location):
@@ -537,6 +546,30 @@ def stalemate(pieces, king):
 
 
 
-# TO BE FURTHER IMPLEMENTED ONCE HELPER FUNCTIONS ARE TESTED
-class game():
-	raise NotImplementedError
+# # TO BE FURTHER IMPLEMENTED ONCE HELPER FUNCTIONS ARE TESTED
+# class game():
+# 	raise NotImplementedError
+
+
+
+if __name__ == "__main__":
+
+	king_locations = [
+		(1,3),
+		(3,4),
+		(7,4),
+		(5,6),
+		(1,1),
+		(7,7)
+	]
+	attacker_locations = [
+		(4,0),
+		(1,2),
+		(3,4),
+		(6,7),
+		(7,7),
+		(7,1)
+	]
+
+	for king, attack in zip(king_locations, attacker_locations): 
+		print(get_direction_of_line(king, attack))
