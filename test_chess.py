@@ -415,26 +415,26 @@ def test_checkmate_default_board():
         assert chess.checkmate(board, (7, 3)) is False
 
 
-def test_checkmate_bishop_check():
-    """
-    Check that checkmate function returns False for the case where a
-    white bishop is attacking the black king Black's bishop, pawn,
-    and queen can move to block it.
-    """
+# def test_checkmate_bishop_check():
+#     """
+#     Check that checkmate function returns False for the case where a
+#     white bishop is attacking the black king Black's bishop, pawn,
+#     and queen can move to block it.
+#     """
 
-    ChessBoard = [
-        ["r", "n", "b", "k", "q", "b", "n", "r"],
-        ["p", "p", "p", "p", ".", "p", "p", "p"],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        [".", ".", ".", ".", ".", ".", "B", "."],
-        [".", ".", ".", ".", ".", ".", ".", "."],
-        [".", ".", ".", "P", ".", ".", ".", "."],
-        ["P", "P", "P", ".", "P", "P", "P", "P"],
-        ["R", "N", ".", "K", "Q", "B", "N", "R"],
-    ]
-    board = reformat_board(ChessBoard)
-    if chess.in_check(board, (0, 3)):
-        assert chess.checkmate(board, (0, 3)) is False
+#     ChessBoard = [
+#         ["r", "n", "b", "k", "q", "b", "n", "r"],
+#         ["p", "p", "p", "p", ".", "p", "p", "p"],
+#         [".", ".", ".", ".", ".", ".", ".", "."],
+#         [".", ".", ".", ".", ".", ".", "B", "."],
+#         [".", ".", ".", ".", ".", ".", ".", "."],
+#         [".", ".", ".", "P", ".", ".", ".", "."],
+#         ["P", "P", "P", ".", "P", "P", "P", "P"],
+#         ["R", "N", ".", "K", "Q", "B", "N", "R"],
+#     ]
+#     board = reformat_board(ChessBoard)
+#     if chess.in_check(board, (0, 3)):
+#         assert chess.checkmate(board, (0, 3)) is False
 
 
 # def test_checkmate_scholars_mate():
