@@ -18,7 +18,6 @@
 # X TEST FUNCTIONS AS I GO
 
 
-
 def reformat_board(chessboard):
     """
     Parameter(s): Takes list of lists of characters denoting each piece
@@ -37,7 +36,7 @@ def reformat_board(chessboard):
         "Q": Queen("white"),
         "q": Queen("black"),
         "K": King("white"),
-        "k": King("black")
+        "k": King("black"),
     }
 
     return {
@@ -48,10 +47,7 @@ def reformat_board(chessboard):
     }
 
 
-
 ### PIECE CLASSES ###
-
-
 
 
 class Pawn:
@@ -89,7 +85,6 @@ class Pawn:
             ):
                 return True
         elif not is_same_color(pieces, (r1, c1), (r2, c2)):
-            print((r2,c2) in pieces)
             if (r1, c1) in generate_pawn_attack_positions(pieces, (r2, c2)):
                 return True
         return False
@@ -195,6 +190,7 @@ def get_line_of_attack(king, attack):
     not including square1.
     """
     dr, dc = get_direction_of_line(king, attack)
+
     r, c = king
     r += dr
     c += dc  # adjust starting position one step
@@ -272,7 +268,9 @@ def has_line_of_sight(pieces, square1, square2):
         pieces, (square1, square2)
     ):  # CANNOT REACH
         return False
+
     dr, dc = get_direction_of_line(square1, square2)
+
     r, c = square1
     r += dr
     c += dc
@@ -296,7 +294,8 @@ def is_king_directly_attacked_along_direction(pieces, king, direction):
     c += dc
     while in_board((r, c)):
         if (r, c) not in pieces:
-            r+=dr; c+=dc
+            r += dr
+            c += dc
             continue
         if is_same_color(pieces, king, (r, c)) or not isinstance(
             pieces[(r, c)], move_directions[(dr, dc)]
@@ -317,6 +316,7 @@ def simulate_move(pieces, move):
         for loc, piece in pieces.items()
         if loc != move[1]
     }
+
 
 def generate_knight_reachable_squares(square):
     """
@@ -482,11 +482,10 @@ def is_threat_resolved(pieces, king, move):
     Parameter(s): Takes current board state, current location of king, move to be simulated.
     Returns: True if the king is no longer in check after move is made, else False
     """
+    if not in_board(move[1]):
+        return False
     new_pieces = simulate_move(pieces, move)
-    new_king = move[1] if isinstance(move[0], King) else king
-    print (move, "\n")
-    print(pieces)
-    print(new_king)
+    new_king = move[1] if isinstance(pieces[move[0]], King) else king
     return not in_check(new_pieces, new_king)
 
 
@@ -523,7 +522,6 @@ def checkmate(pieces, king):
     Returns: True if player is in checkmate, else False
     """
     threat = pieces[king].danger
-    print(f"threat: {threat, pieces[threat]}")
 
     # attempt to handle threat by king escaping
     if can_king_evade_check(pieces, king):
@@ -531,9 +529,11 @@ def checkmate(pieces, king):
         return False
 
     # Knight or Pawn threat
-    if isinstance(threat, (Knight, Pawn)):
+    if isinstance(pieces[threat], (Knight, Pawn)):
         # must capture to handle threat
         for location in pieces:
+            if isinstance(pieces[location], King):
+                continue
             if is_square_attacked_by_piece(pieces, location, threat):
                 if is_threat_resolved(pieces, king, (location, threat)):
                     pieces[king].remove_danger()
@@ -542,7 +542,9 @@ def checkmate(pieces, king):
         # can block or capture to handle threat
         line_of_attack = get_line_of_attack(king, threat)
         for location in pieces:
-            if isinstance(pieces[location], King):
+            if isinstance(pieces[location], King) or not is_same_color(
+                pieces, king, location
+            ):
                 continue
             for square in line_of_attack:
                 if is_square_attacked_by_piece(pieces, location, square):
@@ -661,15 +663,15 @@ if __name__ == "__main__":
     #     print(get_direction_of_line(king, attack))
 
     # ChessBoard = \
-	# 			[
-	# 				["R", "N", "B", "K", "Q", ".", "N", "R"],
-	# 				["P", "P", "P", "P", "P", ".", ".", "P"],
-	# 				[".", ".", ".", ".", ".", ".", ".", "."],
-	# 				[".", ".", ".", ".", ".", ".", "B", "."],
-	# 				[".", ".", ".", ".", ".", ".", ".", "."],
-	# 				[".", ".", ".", ".", ".", ".", ".", "."],
-	# 				["p", "p", "p", "p", ".", "p", "p", "p"],
-	# 				["r", "n", "b", "k", "q", "b", "n", "r"]
-	# 			]
+# 			[
+# 				["R", "N", "B", "K", "Q", ".", "N", "R"],
+# 				["P", "P", "P", "P", "P", ".", ".", "P"],
+# 				[".", ".", ".", ".", ".", ".", ".", "."],
+# 				[".", ".", ".", ".", ".", ".", "B", "."],
+# 				[".", ".", ".", ".", ".", ".", ".", "."],
+# 				[".", ".", ".", ".", ".", ".", ".", "."],
+# 				["p", "p", "p", "p", ".", "p", "p", "p"],
+# 				["r", "n", "b", "k", "q", "b", "n", "r"]
+# 			]
 
-    # print(in_check(reformat_board(ChessBoard), (7,3)))
+# print(in_check(reformat_board(ChessBoard), (7,3)))
