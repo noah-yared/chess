@@ -1,7 +1,7 @@
 import chess
 
 
-def reformat_board(chessboard):
+def reformat_board(chess_board):
     """
     Parameter(s): Takes list of lists of characters denoting each piece
     Returns: Dictionary of pieces that matches chess.py representation
@@ -23,10 +23,10 @@ def reformat_board(chessboard):
     }
 
     return {
-        (row, col): mapping[chessboard[row][col]]
+        (row, col): mapping[chess_board[row][col]]
         for row in range(8)
         for col in range(8)
-        if chessboard[row][col] != "."
+        if chess_board[row][col] != "."
     }
 
 
@@ -80,7 +80,7 @@ def test_is_same_color():
     """
     Testing is_same_color() function
     """
-    chessboard = [
+    chess_board = [
         ["r", "n", "b", "q", "k", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -96,7 +96,7 @@ def test_is_same_color():
 
     for square1, square2, expected in zip(squares1, squares2, expected_results):
         assert (
-            chess.is_same_color(reformat_board(chessboard), square1, square2)
+            chess.is_same_color(reformat_board(chess_board), square1, square2)
             is expected
         )
 
@@ -139,7 +139,7 @@ def test_possible_step_queen():
     """
     Testing possible_step() function for queen
     """
-    chessboard = [
+    chess_board = [
         ["N", ".", ".", ".", ".", ".", "k", "."],
         [".", ".", ".", "P", ".", ".", ".", "."],
         [".", ".", ".", "B", ".", ".", ".", "."],
@@ -177,7 +177,8 @@ def test_possible_step_queen():
 
     for square, expected in zip(squares, expected_results):
         assert (
-            chess.possible_step(reformat_board(chessboard), (queen, square)) is expected
+            chess.possible_step(reformat_board(chess_board), (queen, square))
+            is expected
         )
 
 
@@ -185,7 +186,7 @@ def test_possible_step_bishop():
     """
     Testing possible_step() function for bishop
     """
-    chessboard = [
+    chess_board = [
         ["N", ".", ".", ".", ".", ".", "k", "."],
         [".", ".", ".", "P", ".", ".", ".", "."],
         [".", ".", ".", "B", ".", ".", ".", "."],
@@ -223,7 +224,7 @@ def test_possible_step_bishop():
 
     for square, expected in zip(squares, expected_results):
         assert (
-            chess.possible_step(reformat_board(chessboard), (bishop, square))
+            chess.possible_step(reformat_board(chess_board), (bishop, square))
             is expected
         )
 
@@ -232,7 +233,7 @@ def test_possible_step_rook():
     """
     Testing possible_step() function for rook
     """
-    chessboard = [
+    chess_board = [
         ["N", ".", ".", ".", ".", ".", "k", "."],
         [".", ".", ".", "P", ".", ".", ".", "."],
         [".", ".", ".", "B", ".", ".", ".", "."],
@@ -270,7 +271,7 @@ def test_possible_step_rook():
 
     for square, expected in zip(squares, expected_results):
         assert (
-            chess.possible_step(reformat_board(chessboard), (rook, square)) is expected
+            chess.possible_step(reformat_board(chess_board), (rook, square)) is expected
         )
 
 
@@ -278,7 +279,7 @@ def test_in_check_01():
     # Check that in_check function correctly returns False for white king
     # in the default state of a chess board
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -289,14 +290,14 @@ def test_in_check_01():
         ["R", "N", "B", "K", "Q", "B", "N", "R"],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (7, 3)) == False
+    assert chess.in_check(reformat_board(chess_board), (7, 3)) == False
 
 
 def test_in_check_02():
     # Check that the in_check function returns False for
     # black king for default state of chess board
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -307,14 +308,14 @@ def test_in_check_02():
         ["R", "N", "B", "K", "Q", "B", "N", "R"],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (0, 3)) is False
+    assert chess.in_check(reformat_board(chess_board), (0, 3)) is False
 
 
 def test_in_check_03():
     # Check that the in_check function returns false for a case where King is
     # not in direct line of attack of bishop
 
-    ChessBoard = [
+    chess_board = [
         ["R", "N", "B", "K", "Q", ".", "N", "R"],
         ["P", "P", "P", "P", "P", ".", ".", "P"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -325,14 +326,14 @@ def test_in_check_03():
         ["r", "n", "b", "k", "q", "b", "n", "r"],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (7, 3)) is False
+    assert chess.in_check(reformat_board(chess_board), (7, 3)) is False
 
 
 def test_in_check_04():
     # Check that the in_check function returns True for a case where black king is
     # in direct line of attack of bishop
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", "b", "n", "r"],
         ["p", "p", "p", "p", ".", "p", "p", "p"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -342,14 +343,14 @@ def test_in_check_04():
         ["P", "P", "P", ".", "P", "P", ".", "P"],
         ["R", "N", ".", "K", "Q", "B", "N", "R"],
     ]
-    assert chess.in_check(reformat_board(ChessBoard), (0, 3)) is True
+    assert chess.in_check(reformat_board(chess_board), (0, 3)) is True
 
 
 def test_in_check_05():
     # Check that the in_check function returns False for a case where black king is
     # protected from bishop in direct line of attack.
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", "b", "n", "r"],
         ["p", "p", "p", "p", ".", ".", "p", "p"],
         [".", ".", ".", ".", ".", "p", ".", "."],
@@ -360,12 +361,12 @@ def test_in_check_05():
         ["R", "N", ".", "K", "Q", "B", "N", "R"],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (0, 3)) is False
+    assert chess.in_check(reformat_board(chess_board), (0, 3)) is False
 
 
 def test_in_check_06():
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", ".", "n", "r"],
         ["p", "p", "B", ".", ".", ".", "p", "p"],
         [".", ".", ".", ".", "p", "n", ".", "."],
@@ -376,12 +377,12 @@ def test_in_check_06():
         ["R", ".", ".", "K", "b", "B", ".", "R"],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (0, 3)) is True
+    assert chess.in_check(reformat_board(chess_board), (0, 3)) is True
 
 
 def test_in_check_07():
 
-    ChessBoard = [
+    chess_board = [
         [".", "k", ".", ".", "R", ".", ".", "."],
         ["p", "p", "p", ".", ".", ".", ".", "."],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -392,7 +393,7 @@ def test_in_check_07():
         [".", ".", ".", ".", "K", ".", ".", "."],
     ]
 
-    assert chess.in_check(reformat_board(ChessBoard), (0, 1)) is True
+    assert chess.in_check(reformat_board(chess_board), (0, 1)) is True
 
 
 def test_checkmate_default_board():
@@ -400,7 +401,7 @@ def test_checkmate_default_board():
     Check that checkmate() returns False for the default state of the board
     """
 
-    ChessBoard = [
+    chess_board = [
         ["r", "n", "b", "k", "q", "b", "n", "r"],
         ["p", "p", "p", "p", "p", "p", "p", "p"],
         [".", ".", ".", ".", ".", ".", ".", "."],
@@ -410,546 +411,602 @@ def test_checkmate_default_board():
         ["P", "P", "P", "P", "P", "P", "P", "P"],
         ["R", "N", "B", "K", "Q", "B", "N", "R"],
     ]
-    board = reformat_board(ChessBoard)
+    board = reformat_board(chess_board)
     if chess.in_check(board, (7, 3)):
         assert chess.checkmate(board, (7, 3)) is False
 
 
-# def test_checkmate_bishop_check():
-#     """
-#     Check that checkmate function returns False for the case where a
-#     white bishop is attacking the black king Black's bishop, pawn,
-#     and queen can move to block it.
-#     """
-
-#     ChessBoard = [
-#         ["r", "n", "b", "k", "q", "b", "n", "r"],
-#         ["p", "p", "p", "p", ".", "p", "p", "p"],
-#         [".", ".", ".", ".", ".", ".", ".", "."],
-#         [".", ".", ".", ".", ".", ".", "B", "."],
-#         [".", ".", ".", ".", ".", ".", ".", "."],
-#         [".", ".", ".", "P", ".", ".", ".", "."],
-#         ["P", "P", "P", ".", "P", "P", "P", "P"],
-#         ["R", "N", ".", "K", "Q", "B", "N", "R"],
-#     ]
-#     board = reformat_board(ChessBoard)
-#     if chess.in_check(board, (0, 3)):
-#         assert chess.checkmate(board, (0, 3)) is False
-
-
-# def test_checkmate_scholars_mate():
-# 	"""
-# 	Check that checkmate function returns True for scholar's
-# 	mate as king is trapped in backrank.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", ".", ".", "K", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "p", "p", ".", ".", ".", ".", "."],
-# 				[".", "k", ".", ".", "R", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (1,7), (white, black)):
-# 		assert new_game.checkmate("black", (1,7), (white, black)) == True
-
-
-# def test_checkmate_smothered_mate():
-# 	"""
-# 	Check that checkmate function returns True for
-# 	smothered mate case, where king is smothered by
-# 	his pieces
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", ".", ".", "K", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "p", "N", ".", ".", ".", ".", "."],
-# 				["k", "r", ".", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (1,7), (white, black)):
-# 		assert new_game.checkmate("black", (0,7), (white, black)) == True
-
-# def test_checkmate_protected_queen():
-# 	"""
-# 	Check that checkmate() returns True when white Queen
-# 	is protected by white Bishop and is attacking black King.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", ".", "R", "K", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", "B", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "Q", "p", ".", ".", ".", ".", "."],
-# 				[".", "k", "r", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (1,7), (white, black)):
-# 		assert new_game.checkmate("black", (1,7), (white, black)) == True
-
-# def test_checkmate_anastasias_mate_01():
-# 	"""
-# 	Check that checkmate() returns True for anastasias checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 				[
-# 					[".", ".", ".", "R", "K", ".", ".", "."],
-# 					[".", ".", ".", ".", ".", ".", ".", "."],
-# 					[".", ".", ".", ".", ".", "B", ".", "."],
-# 					[".", ".", ".", ".", ".", ".", ".", "."],
-# 					[".", ".", ".", ".", ".", ".", ".", "."],
-# 					[".", ".", ".", ".", ".", ".", ".", "."],
-# 					["p", "Q", "p", ".", ".", ".", ".", "."],
-# 					[".", "k", "r", ".", ".", ".", ".", "."]
-# 				]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (1,7), (white, black)):
-# 		assert new_game.checkmate("black", (1,7), (white, black)) == True
-
-# def test_checkmate_anastasias_mate_02():
-# 	"""
-# 	Check that checkmate() returns True for anastasias checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				["R", ".", ".", ".", "K", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", "B", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["k", "p", "N", ".", ".", ".", ".", "."],
-# 				[".", "r", "r", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (0,6), (white, black)):
-# 		assert new_game.checkmate("black", (0,6), (white, black)) == True
-
-
-# def test_checkmate_legals_mate():
-# 	ChessBoard = \
-# 				[
-# 					["R", ".", ".", "K", "b", "B", ".", "R"],
-# 					[".", "P", "P", ".", "P", "P", "P", "P"],
-# 					["P", ".", ".", ".", ".", ".", ".", "."],
-# 					[".", ".", ".", "P", ".", ".", ".", "."],
-# 					[".", ".", ".", "N", "N", ".", ".", "."],
-# 					[".", ".", ".", ".", "p", "n", ".", "."],
-# 					["p", "p", "B", "k", ".", ".", "p", "p"],
-# 					["r", "n", "b", ".", "q", ".", "n", "r"]
-# 				]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (3,6), (white, black)):
-# 		assert new_game.checkmate("black", (3,6), (white, black)) == True
-
-
-# def test_checkmate_corner_mate():
-# 	"""
-# 	Check that checkmate() returns True for queen and king corner checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				["R", ".", ".", ".", ".", ".", "K", "."],
-# 				[".", ".", ".", ".", ".", ".", "q", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "k"],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("white", (6,0), (white, black)):
-# 		assert new_game.checkmate("white", (6,0), (white, black)) == True
-
-
-# def test_checkmate_opera_mate():
-# 	"""
-# 	Check that checkmate() returns True for opera mate checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", ".", "r", "K", ".", ".", "."],
-# 				[".", ".", "P", ".", ".", "P", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", "b", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "p", ".", ".", ".", ".", ".", "."],
-# 				[".", "k", ".", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("white", (4,0), (white, black)):
-# 		assert new_game.checkmate("white", (4,0), (white, black)) == True
-
-# def test_checkmate_blackburnes_mate():
-# 	"""
-# 	Check that checkmate() returns True for Blackburne's checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				["R", ".", ".", ".", ".", "R", "K", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "b"],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", "n", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", "b", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", "k", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("white", (6,0), (white, black)):
-# 		assert new_game.checkmate("white", (6,0), (white, black)) == True
-
-
-# def test_checkmate_hook_mate():
-# 	"""
-# 	Check that checkmate() returns True for hook mate checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", "r", ".", ".", ".", ".", "."],
-# 				[".", "P", "K", ".", ".", ".", ".", "."],
-# 				[".", "n", ".", ".", "B", ".", ".", "."],
-# 				[".", ".", "p", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["k", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", "r", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (1,2), (white, black)):
-# 		assert new_game.checkmate("black", (1,2), (white, black)) == True
-
-
-# def test_checkmate_hook_mate():
-# 	"""
-# 	Check that checkmate() returns True for hook mate checkmate pattern.
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", "r", ".", ".", ".", ".", "."],
-# 				[".", "P", "K", ".", ".", ".", ".", "."],
-# 				[".", "n", ".", ".", "B", ".", ".", "."],
-# 				["R", ".", ".", ".", ".", ".", ".", "."],
-# 				["k", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", "Q", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", "r", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("black", (0,4), (white, black)):
-# 		assert new_game.checkmate("black", (0,4), (white, black)) == True
-
-# def test_checkmate_fools_mate():
-# 	"""
-# 	Check that checkmate() returns True for the fools mate checkmate pattern
-# 	"""
-# 	ChessBoard = \
-# 			[
-# 				["R", "N", "B", "K", "Q", "B", "N", "R"],
-# 				["P", ".", ".", "P", "P", "P", "P", "P"],
-# 				[".", ".", "P", ".", ".", ".", ".", "."],
-# 				["q", "P", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", "p", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "p", "p", ".", "p", "p", "p", "p"],
-# 				["r", "n", "b", "k", ".", "b", "n", "r"]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	if new_game.in_check("white", (3,0), (white, black)):
-# 		assert new_game.checkmate("white", (3,0), (white, black)) == True
-
-# def test_no_checkmate_01():
-
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", "r", ".", ".", ".", ".", "."],
-# 				[".", "P", "K", ".", ".", ".", ".", "."],
-# 				[".", "q", ".", ".", ".", ".", ".", "."],
-# 				["b", ".", ".", ".", ".", ".", ".", "."],
-# 				["k", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (2,1), (white, black))
-# 	assert new_game.checkmate("white", (2,1), (white, black)) == False
-
-# def test_no_checkmate_02():
-
-# 	ChessBoard = \
-# 			[
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", "P", "K", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", "B", ".", ".", "."],
-# 				["R", ".", ".", ".", ".", ".", ".", "."],
-# 				["k", "Q", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."]
-# 			]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("black", (0,4), (white, black))
-# 	assert new_game.checkmate("black", (0,4), (white, black)) == False
-
-# def test_no_checkmate_03():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", ".", ".", ".", "r", ".", ".", "."],
-# 			[".", ".", ".", "K", ".", ".", ".", "B"],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", "n", ".", ".", ".", ".", ".", "."],
-# 			["k", ".", ".", ".", ".", ".", "q", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", "r", ".", ".", ".", ".", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (3,1), (white, black))
-# 	assert new_game.checkmate("white", (3,1), (white, black)) == False
-
-
-# def test_no_checkmate_04():
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", "R", ".", ".", "Q", ".", "."],
-# 			["P", "P", "P", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["R", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "b"],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", "p", "p", "p", ".", ".", "."],
-# 			[".", ".", "r", "k", ".", ".", "R", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("black", (3,7), (white, black))
-# 	assert new_game.checkmate("black", (3,7), (white, black)) == False
-
-
-# def test_no_checkmate_05():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", ".", "R", ".", ".", ".", "."],
-# 			["P", "P", "P", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["R", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", "B", "."],
-# 			[".", ".", "p", ".", "p", ".", ".", "."],
-# 			[".", ".", "r", "k", ".", ".", "q", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("black", (3,7), (white, black))
-# 	assert new_game.checkmate("black", (3,7), (white, black)) == False
-
-# def test_no_checkmate_06():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", ".", "R", ".", ".", ".", "."],
-# 			["P", "P", "P", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["R", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", "p", ".", ".", "."],
-# 			[".", ".", "p", ".", ".", ".", ".", "."],
-# 			[".", ".", "r", "k", ".", ".", "q", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("black", (3,7), (white, black))
-# 	assert new_game.checkmate("black", (3,7), (white, black)) == False
-
-# def test_no_checkmate_07():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", ".", "R", ".", ".", ".", "."],
-# 			["P", "q", "P", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["p", "p", "p", ".", ".", ".", ".", "."],
-# 			[".", "k", "r", ".", ".", ".", ".", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (1,0), (white, black))
-# 	assert new_game.checkmate("white", (1,0), (white, black)) == False
-
-# def test_no_checkmate_08():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", ".", "K", ".", ".", ".", ".", "r"],
-# 			["P", "R", ".", ".", ".", "r", ".", "."],
-# 			[".", "P", "P", ".", ".", ".", ".", "."],
-# 			["n", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", "p", ".", ".", ".", ".", ".", "."],
-# 			["p", "B", "p", ".", ".", "p", "p", "p"],
-# 			[".", ".", ".", ".", ".", ".", "k", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	assert new_game.in_check("white", (2,0), (white, black)) == True
-# 	print(new_game.danger)
-# 	assert new_game.checkmate("white", (2,0), (white, black)) == False
-
-
-# def test_no_checkmate_09():
-
-# 	ChessBoard = \
-# 		[
-# 			["K", ".", "R", ".", "r", ".", ".", "."],
-# 			["P", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["N", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["p", "p", "p", ".", ".", ".", ".", "b"],
-# 			[".", "k", "r", ".", ".", ".", ".", "b"]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (0,0), (white, black))
-# 	assert new_game.checkmate("white", (0,0), (white, black)) == False
-
-# def test_no_checkmate_10():
-
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", ".", "R", ".", ".", ".", "."],
-# 			["P", ".", ".", ".", ".", ".", ".", "."],
-# 			["b", "q", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["p", "p", "p", ".", ".", ".", ".", "."],
-# 			[".", "k", "r", ".", ".", ".", ".", "b"]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (1,0), (white, black))
-# 	assert new_game.checkmate("white", (1,0), (white, black)) == False
-
-# def test_checkmate_01():
-# 	ChessBoard = \
-# 		[
-# 			[".", "K", ".", "R", ".", "Q", ".", "."],
-# 			["P", "P", "P", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["R", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", "N", "b", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", "p", ".", "p", ".", ".", "."],
-# 			[".", ".", "r", "k", ".", ".", "R", "."]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("black", (3,7), (white, black))
-# 	assert new_game.checkmate("black", (3,7), (white, black)) == True
-
-
-# def test_checkmate_02():
-
-# 	ChessBoard = \
-# 		[
-# 			["K", ".", ".", ".", "r", ".", ".", "."],
-# 			["P", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", "B", ".", ".", ".", ".", "."],
-# 			["n", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			[".", ".", ".", ".", ".", ".", ".", "."],
-# 			["p", "p", "p", ".", ".", ".", ".", "."],
-# 			[".", "k", "r", ".", ".", ".", ".", "b"]
-# 		]
-
-# 	white, black = reformatBoard(ChessBoard)
-
-# 	new_game = chess.game()
-# 	new_game.in_check("white", (0,0), (white, black))
-# 	assert new_game.checkmate("white", (0,0), (white, black)) == True
+def test_checkmate_bishop_check():
+    """
+    Check that checkmate function returns False for the case where a
+    white bishop is attacking the black king and Black's bishop, pawn,
+    and queen can move to block it.
+    """
+
+    chess_board = [
+        ["r", "n", "b", "k", "q", "b", "n", "r"],
+        ["p", "p", "p", "p", ".", "p", "p", "p"],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "B", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "P", ".", ".", ".", "."],
+        ["P", "P", "P", ".", "P", "P", "P", "P"],
+        ["R", "N", ".", "K", "Q", "B", "N", "R"],
+    ]
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 3)):
+        assert chess.checkmate(board, (0, 3)) is False
+
+
+def test_checkmate_backrank_mate():
+    """
+          Check that checkmate function returns True for backrank
+    as king is trapped in backrank.
+    """
+    chess_board = [
+        [".", "k", ".", ".", "R", ".", ".", "."],
+        ["p", "p", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "K", ".", ".", ".", "."],
+    ]
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 1)):
+        assert chess.checkmate(board, (0, 1)) is True
+
+
+def test_checkmate_smothered_mate():
+    """
+    Check that checkmate function returns True for
+    smothered mate case, where king is smothered by
+    his pieces
+    """
+    chess_board = [
+        ["k", "r", ".", ".", ".", ".", ".", "."],
+        ["p", "p", "N", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", "K", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 0)):
+        assert chess.checkmate(board, (0, 0)) is True
+
+
+def test_checkmate_protected_queen_01():
+    """
+    Check that checkmate() returns True when white Queen
+    is protected by white Bishop and is attacking black King.
+    """
+    chess_board = [
+        [".", "k", "r", ".", ".", ".", ".", "."],
+        ["p", "Q", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", "B", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "R", "K", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 1)):
+        assert chess.checkmate(board, (0, 1)) is True
+
+
+def test_checkmate_anastasias_mate():
+    """
+    Check that checkmate() returns True for anastasias checkmate pattern.
+    """
+    chess_board = [
+        ["r", ".", ".", ".", "k", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "p", ".", ".", ".", "."],
+        ["K", "P", "b", ".", ".", ".", ".", "."],
+        [".", "R", "R", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (6, 0)):
+        assert chess.checkmate(board, (6, 0))
+
+
+def test_checkmate_legals_mate():
+    chess_board = [
+        ["r", "n", "b", ".", "q", ".", "n", "r"],
+        ["p", "p", "B", "k", ".", ".", "p", "p"],
+        [".", ".", ".", ".", "p", "n", ".", "."],
+        [".", ".", ".", "N", "N", ".", ".", "."],
+        [".", ".", ".", "P", ".", ".", ".", "."],
+        ["P", ".", ".", ".", ".", ".", ".", "."],
+        [".", "P", "P", ".", "P", "P", "P", "P"],
+        ["R", ".", ".", "K", "b", "B", ".", "R"],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (1, 3)):
+        assert chess.checkmate(board, (1, 3)) is True
+
+
+def test_checkmate_corner_mate():
+    """
+    Check that checkmate() returns True for queen and king corner checkmate pattern.
+    """
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        [".", ".", ".", ".", ".", ".", "q", "."],
+        ["R", ".", ".", ".", ".", ".", "K", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 6)):
+        assert chess.checkmate(board, (7, 6)) is True
+
+
+def test_checkmate_opera_mate():
+    """
+    Check that checkmate() returns True for opera mate checkmate pattern.
+    """
+    chess_board = [
+        [".", "k", ".", ".", ".", ".", ".", "."],
+        ["p", "p", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "b", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "P", ".", ".", "P", ".", "."],
+        [".", ".", ".", "r", "K", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 4)):
+        assert chess.checkmate(board, (7, 4)) is True
+
+
+def test_checkmate_blackburnes_mate():
+    """
+    Check that checkmate() returns True for Blackburne's checkmate pattern.
+    """
+    chess_board = [
+        [".", ".", "k", ".", ".", ".", ".", "."],
+        [".", "b", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "n", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "b"],
+        [".", "R", ".", ".", ".", "R", "K", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 6)):
+        assert chess.checkmate(board, (7, 6)) is True
+
+
+def test_checkmate_hook_mate():
+    """
+    Check that checkmate() returns True for hook mate checkmate pattern.
+    """
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["k", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "p", ".", "B", ".", ".", "."],
+        [".", "n", ".", ".", ".", ".", ".", "."],
+        [".", "P", "K", ".", ".", ".", ".", "."],
+        [".", ".", "r", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (6, 2)):
+        assert chess.checkmate(board, (6, 2)) is True
+
+
+def test_checkmate_hook_mate():
+    """
+    Check that checkmate() returns True for hook mate checkmate pattern.
+    """
+    chess_board = [
+        [".", ".", "r", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "Q", ".", ".", ".", ".", "."],
+        ["k", ".", ".", ".", ".", ".", ".", "."],
+        ["R", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", "P", "K", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (3, 0)):
+        assert chess.checkmate(board, (3, 0)) is True
+
+
+def test_checkmate_fools_mate():
+    """
+    Check that checkmate() returns True for the fools mate checkmate pattern
+    """
+    chess_board = [
+        ["r", "n", "b", "k", ".", "b", "n", "r"],
+        ["p", "p", "p", ".", "p", "p", "p", "p"],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "p", ".", ".", ".", "."],
+        ["q", "P", ".", ".", ".", ".", ".", "."],
+        [".", ".", "P", ".", ".", ".", ".", "."],
+        ["P", ".", ".", "P", "P", "P", "P", "P"],
+        ["R", "N", "B", "K", "Q", "B", "N", "R"],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 3)):
+        assert chess.checkmate(board, (7, 3)) is True
+
+
+def test_miscellaneous_checkmate_01():
+    chess_board = [
+        [".", "k", ".", "r", ".", "q", ".", "."],
+        ["p", "p", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["r", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "n", "B", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "P", ".", "P", ".", ".", "."],
+        [".", ".", "R", "K", ".", ".", "r", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 3)):
+        assert chess.checkmate(board, (7, 3)) is True
+
+
+def test_miscellaneous_checkmate_02():
+
+    chess_board = [
+        ["k", ".", ".", ".", "R", ".", ".", "."],
+        ["p", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "b", ".", ".", ".", ".", "."],
+        ["N", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", "P", "P", ".", ".", ".", ".", "."],
+        [".", "K", "R", ".", ".", ".", ".", "B"],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 0)):
+        assert chess.checkmate(board, (0, 0)) is True
+
+
+def test_no_checkmate_01():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["k", ".", ".", ".", ".", ".", ".", "."],
+        ["b", ".", ".", ".", ".", ".", ".", "."],
+        [".", "q", ".", ".", ".", "n", ".", "."],
+        [".", "P", "K", ".", ".", ".", ".", "."],
+        [".", ".", "r", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (6, 2)):
+        assert chess.checkmate(board, (6, 2)) is False
+
+
+def test_no_checkmate_02():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["k", "Q", ".", ".", ".", ".", ".", "."],
+        ["R", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", "B", ".", ".", "."],
+        [".", "P", "K", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (3, 0)):
+        assert chess.checkmate(board, (3, 0)) is False
+
+
+def test_no_checkmate_03():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "n", ".", ".", ".", "q", "."],
+        ["k", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", "K", ".", ".", ".", "B"],
+        [".", ".", "r", ".", "r", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (6, 3)):
+        assert chess.checkmate(board, (6, 3)) is False
+
+
+def test_no_checkmate_04():
+    chess_board = [
+        [".", ".", "r", "k", ".", ".", "R", "."],
+        [".", ".", "p", "p", "p", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "b"],
+        ["R", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", "P", "P", ".", ".", ".", ".", "."],
+        [".", "K", "R", ".", ".", "Q", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 3)):
+        assert chess.checkmate(board, (0, 3)) is False
+
+
+def test_no_checkmate_05():
+
+    chess_board = [
+        [".", "k", ".", "r", ".", ".", ".", "."],
+        ["p", "p", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["r", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "b", "."],
+        [".", ".", "P", ".", "P", ".", ".", "."],
+        [".", ".", "R", "K", ".", ".", "Q", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 3)):
+        assert chess.checkmate(board, (7, 3)) is False
+
+
+def test_no_checkmate_06():
+
+    chess_board = [
+        [".", ".", "r", "k", ".", ".", "q", "."],
+        [".", ".", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", "p", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["B", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", "P", "P", ".", ".", ".", ".", "."],
+        [".", "K", ".", "R", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 3)):
+        assert chess.checkmate(board, (0, 3)) is False
+
+
+def test_no_checkmate_07():
+
+    chess_board = [
+        [".", "k", "r", ".", ".", ".", ".", "."],
+        ["p", "p", "p", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", "q", "P", ".", ".", ".", ".", "."],
+        [".", "K", ".", "R", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 1)):
+        assert chess.checkmate(board, (7, 1)) is False
+
+
+def test_no_checkmate_08():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", "k", "."],
+        ["p", "B", "p", ".", ".", "p", "p", "p"],
+        [".", "p", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["n", ".", ".", ".", ".", ".", ".", "."],
+        [".", "P", "P", ".", ".", ".", ".", "."],
+        ["P", "R", ".", ".", ".", "r", ".", "."],
+        [".", ".", "K", ".", ".", ".", ".", "r"],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 2)):
+        assert chess.checkmate(board, (7, 2)) is False
+
+
+def test_no_checkmate_09():
+
+    chess_board = [
+        [".", "k", "r", ".", ".", ".", ".", "b"],
+        ["p", "p", "p", ".", ".", ".", ".", "b"],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["N", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", ".", ".", ".", ".", ".", ".", "."],
+        ["K", ".", "R", ".", "r", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (7, 0)):
+        assert chess.checkmate(board, (7, 0)) is False
+
+
+def test_no_checkmate_10():
+
+    chess_board = [
+        [".", "k", ".", "r", ".", ".", ".", "."],
+        ["p", ".", ".", ".", ".", ".", ".", "."],
+        ["B", "Q", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        ["P", "P", "P", ".", ".", ".", ".", "."],
+        [".", "K", "R", ".", ".", ".", ".", "B"],
+    ]
+
+    board = reformat_board(chess_board)
+    if chess.in_check(board, (0, 1)):
+        assert chess.checkmate(board, (0, 1)) is False
+
+
+def test_stalemate_01():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        [".", ".", ".", "K", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "Q", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 7)) is True
+
+
+def test_stalemate_02():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        [".", ".", ".", ".", ".", ".", ".", "P"],
+        [".", ".", ".", ".", ".", ".", ".", "K"],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 7)) is True
+
+
+def test_stalemate_03():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        ["p", ".", ".", ".", ".", ".", ".", "."],
+        ["P", ".", "p", ".", ".", ".", ".", "K"],
+        [".", ".", "P", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", "B", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 7)) is True
+
+
+def test_stalemate_04():
+
+    chess_board = [
+        [".", "k", ".", ".", ".", ".", ".", "."],
+        ["b", ".", ".", ".", ".", ".", ".", "."],
+        [".", "p", ".", ".", ".", ".", ".", "."],
+        [".", "P", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", "B", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "R", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 1)) is True
+
+
+def test_no_stalemate_01():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        [".", "p", ".", "K", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", "Q", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 7)) is False
+
+
+def test_no_stalemate_02():
+
+    chess_board = [
+        [".", ".", ".", ".", ".", ".", ".", "k"],
+        [".", "p", ".", ".", ".", ".", ".", "P"],
+        ["P", "P", ".", ".", ".", ".", ".", "K"],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 7)) is False
+
+
+def test_no_stalemate_03():
+
+    chess_board = [
+        [".", "k", ".", ".", ".", ".", ".", "."],
+        ["b", ".", ".", ".", ".", ".", ".", "."],
+        [".", "p", ".", ".", ".", ".", ".", "."],
+        ["P", "P", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", "B", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "R", ".", "K", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 1)) is False
+
+
+def test_no_stalemate_04():
+
+    chess_board = [
+        [".", "k", ".", ".", ".", ".", ".", "."],
+        ["b", "B", ".", ".", ".", ".", ".", "."],
+        [".", "p", ".", ".", ".", ".", ".", "."],
+        [".", "P", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", ".", ".", ".", ".", ".", "."],
+        [".", ".", "R", ".", ".", ".", ".", "."],
+    ]
+
+    board = reformat_board(chess_board)
+    assert chess.stalemate(board, (0, 1)) is False
 
 
 if __name__ == "__main__":
