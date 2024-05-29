@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<html lang = "en-US">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="author" content="Noah Yared"/>
+    <meta name="description" content="Play chess games against ai with different difficulties, online opponent, or local opponent."/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chess</title>
+    <meta name="keywords" content="chess, play chess, play online chess, play computer, chessboard"/>
+    <link rel="stylesheet" href="main.css"/>
+    <!-- <script src="chess.js" defer></script> -->
+  </head>
+  <body>
+    <div id="title">
+      <h1>Play Chess</h1>
+    </div>
+    <div id="middle">
+      <div id="links">
+        <div id="computer">
+          <a class="link" href="https://www.chess.com/home" title="" target="_blank">
+              <div><img src="images/robot.png" width="50" height="50"/> </div>
+              <p>Play computer</p>
+          </a>
+        </div>
+        <div id="online">
+          <a class="link" href="https://www.chess.com/home" title="" target="_blank">
+              <div><img src="images/online.png" width="50" height="50"/> </div>
+              <p id="online-text">Play online</p>
+          </a>
+        </div>
+        <div id="local">
+          <a class="link" href="https://www.chess.com/home" title="" target="_blank">
+              <div id="local-logo"><img src="images/handshake.png" width="100" height="100"/> </div>
+              <p id="local-text">Play local</p>
+          </a>
+        </div>
+      </div>
+      <!-- <div id="chessboard">
+        <div class="square"><img src="images/black_rook.png"/></div>
+        <div class="square"><img src="images/black_knight.png"/></div>
+        <div class="square"><img src="images/black_bishop.png"/></div>
+        <div class="square"><img src="images/black_queen.png"/></div>
+        <div class="square"><img src="images/black_king.png"/></div>
+        <div class="square"><img src="images/black_bishop.png"/></div>
+        <div class="square"><img src="images/black_knight.png"/></div>
+        <div class="square"><img src="images/black_rook.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_rook.png"/></div>
+        <div class="square"><img src="images/white_knight.png"/></div>
+        <div class="square"><img src="images/white_bishop.png"/></div>
+        <div class="square"><img src="images/white_queen.png"/></div>
+        <div class="square"><img src="images/white_king.png"/></div>
+        <div class="square"><img src="images/white_bishop.png"/></div>
+        <div class="square"><img src="images/white_knight.png"/></div>
+        <div class="square"><img src="images/white_rook.png"/></div>
+      </div> -->
+
+      <div id="board">
+        <table class="James">
+          <colgroup>
+            <col class="James" style="width:60px;" span="8"/>
+          </colgroup>
+          <tr>
+            <td class="off-color"><img src="images/black_rook.png"/></td>
+            <td><img src="images/black_knight.png"/></td>
+            <td class="off-color"><img src="images/black_bishop.png"/></td>
+            <td><img src="images/black_king.png"/></td>
+            <td class="off-color"><img src="images/black_queen.png"/></td>
+            <td><img src="images/black_bishop.png"/></td>
+            <td class="off-color"><img src="images/black_knight.png"/></td>
+            <td><img src="images/black_rook.png"/></td>
+          </tr>
+          <tr>
+            <td><img src="images/black_pawn.png"/></td>
+            <td class="off-color"><img src="images/black_pawn.png"/></td>
+            <td><img src="images/black_pawn.png"/></td>
+            <td class="off-color"><img src="images/black_pawn.png"/></td>
+            <td><img src="images/black_pawn.png"/></td>
+            <td class="off-color"><img src="images/black_pawn.png"/></td>
+            <td><img src="images/black_pawn.png"/></td>
+            <td class="off-color"><img src="images/black_pawn.png"/></td>
+          </tr>
+          <tr>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+          </tr>
+          <tr>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+            <td>&nbsp;</td>
+            <td class="off-color">&nbsp;</td>
+          </tr>
+          <tr>
+            <td class="off-color"><img src="images/white_pawn.png"/></td>
+            <td><img src="images/white_pawn.png"/></td>
+            <td class="off-color"><img src="images/white_pawn.png"/></td>
+            <td><img src="images/white_pawn.png"/></td>
+            <td class="off-color"><img src="images/white_pawn.png"/></td>
+            <td><img src="images/white_pawn.png"/></td>
+            <td class="off-color"><img src="images/white_pawn.png"/></td>
+            <td><img src="images/white_pawn.png"/></td>
+          </tr>
+          <tr>
+            <td><img src="images/white_rook.png"/></td>
+            <td class="off-color"><img src="images/white_knight.png"/></td>
+            <td><img src="images/white_bishop.png"/></td>
+            <td class="off-color"><img src="images/white_king.png"/></td>
+            <td><img src="images/white_queen.png"/></td>
+            <td class="off-color"><img src="images/white_bishop.png"/></td>
+            <td><img src="images/white_knight.png"/></td>
+            <td class="off-color"><img src="images/white_rook.png"/></td>      
+          </tr>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>
