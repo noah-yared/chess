@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="author" content="Noah Yared"/>
+    <meta name="description" content="Playing locally against friends on the same device"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Local Chess</title>
+    <link rel="stylesheet" href="local-chess.css"/>
+    <script src="localChess.js" defer></script>
+  </head>
+  <body>
+    <button type="button" id="theme"><img src="images/theme.png" height="30" width="30">Change Theme</button>
+    <div id="content">
+      <div id="white-captured">
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+        <div class="captured-white-piece"></div>
+      </div>
+      <div id="clock">
+        <p id="black-clock"></p>
+        <p id="white-clock"></p>
+      </div>
+      <div id="names"></div>
+      <div id="chessboard">
+        <div class="square"><img src="images/black_rook.png"/></div>
+        <div class="square"><img src="images/black_knight.png"/></div>
+        <div class="square"><img src="images/black_bishop.png"/></div>
+        <div class="square"><img src="images/black_queen.png"/></div>
+        <div class="square"><img src="images/black_king.png"/></div>
+        <div class="square"><img src="images/black_bishop.png"/></div>
+        <div class="square"><img src="images/black_knight.png"/></div>
+        <div class="square"><img src="images/black_rook.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"><img src="images/black_pawn.png"/></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_pawn.png"/></div>
+        <div class="square"><img src="images/white_rook.png"/></div>
+        <div class="square"><img src="images/white_knight.png"/></div>
+        <div class="square"><img src="images/white_bishop.png"/></div>
+        <div class="square"><img src="images/white_queen.png"/></div>
+        <div class="square"><img src="images/white_king.png"/></div>
+        <div class="square"><img src="images/white_bishop.png"/></div>
+        <div class="square"><img src="images/white_knight.png"/></div>
+        <div class="square"><img src="images/white_rook.png"/></div>
+      </div>
+      <div id="text">
+        <div id="game-settings">
+          <form id="form">
+            <p>
+              <div id="options">
+                <select id="time" name="time">
+                  <option value="1">1 min</option>
+                  <option value="3">3 min</option>
+                  <option value="5">5 min</option>
+                  <option value="10">10 min</option>
+                  <option value="15">15 min</option>
+                  <option value="30">30 min</option>
+                  <option value="60">60 min</option>
+                  <option value="Untimed">No timer</option>
+                </select>
+              </div>
+            </p>
+            <label class="name" for="user_name">Enter White Player:</label>
+            <input id="white-name" type="text"></input>
+            <br>
+            <label class="name" for="user_name">Enter Black Player:</label>
+            <input id="black-name" type="text"></input>
+            <br><br>
+            <button type="submit" id="start-game" style="font-size:large; font-family:'Times New Roman', Times, serif;">Start game</button>
+          </form>
+        </div>
+      </div>
+      <div id="black-captured">
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+        <div class="captured-black-piece"></div>
+      </div>
+    </div>
+  </body>
+
+</html>
