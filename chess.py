@@ -1,21 +1,4 @@
-# CODE BASE REFACTORED!
-# ________________________________________
-# X FIX GET_DIRECTION_OF_LINE() -- BUG FIXED!!!
-# X ADD TESTS FOR POSSIBLE_MOVE() FOR EACH PIECE
-# X TEST CHECK() FUNCTION USING OLD TESTCASES
-# X TEST CHECKMATES() FUNCTION USING OLD TESTCASES
-# X TEST STALEMATE() FUNCTION
-# __________________________________________
-# X MAKE SURE TO ADD CLEAR DOCSTRING/COMMENTS!!!
-# __________________________________________
-
-# GOALS:
-# _________________________________________
-# MAKE FUNCTION PARAMETERS STANDARDIZED:
-# X DO NOT SHY AWAY FROM PASSING BOARD AS A PARAMETER TO FUNCTION
-# X KEEP PYGAME GUI IN MIND WHEN WRITING FUNCTIONS
-# X MAKE FUNCTIONS TESTABLE
-# X TEST FUNCTIONS AS I GO
+# Refactored!
 
 
 def reformat_board(chessboard):
@@ -47,6 +30,18 @@ def reformat_board(chessboard):
     }
 
 
+default_board = [
+    ["r", "n", "b", "q", "k", "b", "n", "r"],
+    ["p", "p", "p", "p", "p", "p", "p", "p"],
+    [".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", "."],
+    [".", ".", ".", ".", ".", ".", ".", "."],
+    ["P", "P", "P", "P", "P", "P", "P", "P"],
+    ["R", "N", "B", "Q", "K", "B", "N", "R"],
+]
+
+
 ### PIECE CLASSES ###
 
 
@@ -65,9 +60,8 @@ class Pawn:
         if self.color == "white":
             if position[0] == 6:
                 return True
-        else:
-            if position[0] == 1:
-                return True
+        elif position[0] == 1:
+            return True
         return False
 
     def possible_move(self, pieces, move):
@@ -79,6 +73,7 @@ class Pawn:
         UP, DOWN = -1, 1
         dr = UP if self.color == "white" else DOWN
         (r1, c1), (r2, c2) = move
+        print("Recognize pawn double step:", (r1 + 2 * dr, c1) == (r2, c2))
         if (r2, c2) not in pieces:
             if (r1 + dr, c1) == (r2, c2) or (
                 self.can_double_step((r1, c1)) and (r1 + 2 * dr, c1) == (r2, c2)
@@ -89,6 +84,27 @@ class Pawn:
                 return True
         return False
 
+    def generate_moves(self, pieces, square):
+        moves = []
+        dr = -1 if self.color == "white" else 1
+        r, c = square
+        if self.can_double_step():
+            if in_board((r + 2 * dr, c)) and (r + 2 * dr, c) not in pieces:
+                moves.append((r + 2 * dr, c))
+        if in_board((r + dr, c)) and (r + dr, c) not in pieces:
+            moves.append(r + dr, c)
+        if in_board((r + dr, c - 1)):
+            if (r + dr, c - 1) in pieces and pieces[
+                (r + dr, c - 1)
+            ].color != self.color:
+                moves.append((r + dr, c - 1))
+        if in_board((r + dr, c + 1)):
+            if (r + dr, c + 1) in pieces and pieces[
+                (r + dr, c + 1)
+            ].color != self.color:
+                moves.append((r + dr, c + 1))
+        return moves
+
 
 class Knight:
     def __init__(self, color):
@@ -98,7 +114,7 @@ class Knight:
         return self.color
 
     def possible_move(self, pieces, move):
-        if (abs(move[0][0] - move[1][0], abs(move[0][1] - move[1][1]))) not in {
+        if (abs(move[0][0] - move[1][0]), abs(move[0][1] - move[1][1])) not in {
             (1, 2),
             (2, 1),
         }:
@@ -106,6 +122,25 @@ class Knight:
         if not is_same_color(pieces, *move):
             return True
         return False
+
+    def generate_moves(self, pieces, square):
+        r, c = square
+        directions = [
+            (1, 2),
+            (-1, 2),
+            (1, -2),
+            (-1, -2),
+            (2, 1),
+            (-2, 1),
+            (2, -1),
+            (-2, -1),
+        ]
+        return [
+            (r + dr, c + dc)
+            for (dr, dc) in directions
+            if in_board((r + dr, c + dc))
+            and not is_same_color(pieces, (r + dr, c + dc), square)
+        ]
 
 
 class Rook:
@@ -118,6 +153,22 @@ class Rook:
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
 
+    def generate_moves(self, pieces, square):
+        moves = []
+        directions = [(-1, 0), (1, 0), (0, 1), (0, -1)]
+        for dr, dc in directions:
+            r, c = square[0] + dr, square[1] + dc
+            while in_board((r, c)):
+                if is_same_color(pieces, (r, c), square):
+                    break
+                if (r, c) in pieces:
+                    moves.append(r, c)
+                    break
+                moves.append(r, c)
+                r += dr
+                c += dc
+        return moves
+
 
 class Bishop:
     def __init__(self, color):
@@ -128,6 +179,22 @@ class Bishop:
 
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
+
+    def generate_moves(self, pieces, square):
+        moves = []
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+        for dr, dc in directions:
+            r, c = square[0] + dr, square[1] + dc
+            while in_board((r, c)):
+                if is_same_color(pieces, (r, c), square):
+                    break
+                if (r, c) in pieces:
+                    moves.append(r, c)
+                    break
+                moves.append(r, c)
+                r += dr
+                c += dc
+        return moves
 
 
 class Queen:
@@ -140,6 +207,31 @@ class Queen:
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
 
+    def generate_moves(self, pieces, square):
+        moves = []
+        directions = [
+            (1, 1),
+            (-1, 0),
+            (1, -1),
+            (1, 0),
+            (-1, -1),
+            (0, 1),
+            (-1, 1),
+            (0, -1),
+        ]
+        for dr, dc in directions:
+            r, c = square[0] + dr, square[1] + dc
+            while in_board((r, c)):
+                if is_same_color(pieces, (r, c), square):
+                    break
+                if (r, c) in pieces:
+                    moves.append(r, c)
+                    break
+                moves.append(r, c)
+                r += dr
+                c += dc
+        return moves
+
 
 class King:
     def __init__(self, color):
@@ -151,6 +243,12 @@ class King:
     def get_color(self):
         return self.color
 
+    def possible_move(self, pieces, move):
+        if abs(move[1][0] - move[0][0]) <= 1 and abs(move[0][1] - move[1][1]) <= 1:
+            if not is_same_color(pieces, *move):
+                return True
+        return False
+
     def set_danger(self, square):
         self.danger = square
 
@@ -160,6 +258,16 @@ class King:
     def set_location(self, square):
         self.location = square
         self.moved = True
+
+    def generate_moves(self, pieces, square):
+        r, c = square
+        return [
+            (r + dr, c + dc)
+            for dr in range(-1, 2)
+            for dc in range(-1, 2)
+            if not is_same_color(pieces, (r + dr, c + dc), square)
+            and in_board((r + dr, c + dc))
+        ]
 
 
 # dictionary representing possible move_directions of each piece (EXCLUDING PAWNS):
@@ -173,6 +281,8 @@ move_directions = {
     (1, -1): (Bishop, Queen, King),
     (-1, -1): (Bishop, Queen, King),
 }
+
+### Helper functions ###
 
 
 def in_board(square):
@@ -297,8 +407,13 @@ def is_king_directly_attacked_along_direction(pieces, king, direction):
             r += dr
             c += dc
             continue
-        if is_same_color(pieces, king, (r, c)) or not isinstance(
-            pieces[(r, c)], move_directions[(dr, dc)]
+        if (
+            is_same_color(pieces, king, (r, c))
+            or not isinstance(pieces[(r, c)], move_directions[(dr, dc)])
+            or (
+                isinstance(pieces[(r, c)], King)
+                and (r, c) != (king[0] + dr, king[1] + dc)
+            )
         ):
             break
         pieces[king].set_danger((r, c))  # store attacking piece in danger
@@ -441,17 +556,6 @@ def generate_king_reachable_squares(king):
     ]
 
 
-def can_block(pieces, blocking_piece, attack):
-    """
-    Parameter(s): Takes current board state, position of king on square1,
-    position of attacking piece on square2, and position of blocking_piece
-    Returns: True if blocking_piece can obstruct line of attack of attack piece
-    on king
-    """
-    ## I DONT KNOW IF NEEDED (LIKELY NOT)
-    pass
-
-
 def is_square_attacked_by_piece(pieces, piece_location, square):
     """
     Parameter(s): Takes current board state, position of piece on square1
@@ -499,21 +603,6 @@ def can_king_evade_check(pieces, king):
             continue
         if is_threat_resolved(pieces, king, (king, square)):
             return True
-
-
-# def can_pawn_disrupt_line_of_attack(pieces, king, pawn, line_of_attack):
-# 	"""
-# 	Parameter(s): Takes current board state, current location of king,
-# 	location of pawn, list of squares in line of attack
-# 	Returns: True if pawn can block the attack coming from the line of attakc
-# 	"""
-# 	for square in line_of_attack:
-# 		if is_same_color(pieces, pawn, square):
-# 			continue
-# 		if is_square_attacked_by_pawn(pieces, square, pawn):
-# 			if is_threat_resolved(pieces, king, (pawn, square)):
-# 				pieces[king].remove_danger()
-# 				return False
 
 
 def checkmate(pieces, king):
@@ -649,9 +738,60 @@ def stalemate(pieces, king):
     return True
 
 
-# # TO BE FURTHER IMPLEMENTED ONCE HELPER FUNCTIONS ARE TESTED
-# class game():
-# 	raise NotImplementedError
+class game:
+
+    def __init__(self):
+        self.moves = 0
+        self.pieces = reformat_board(default_board)
+        self.game_over = False
+        self.black_king = (0, 4)
+        self.white_king = (7, 4)
+        self.check = False
+
+    def make_move(self, move):
+        player_color, king = (
+            ("white", self.white_king)
+            if self.moves % 2 == 0
+            else ("black", self.black_king)
+        )
+        if (
+            move[0] not in self.pieces
+            or self.pieces[move[0]].get_color() != player_color
+        ):
+            return False
+        if in_board(move[1]) and not is_same_color(self.pieces, *move):
+            ## Validate move
+            if not self.pieces[move[0]].possible_move(
+                self.pieces, move
+            ) or not is_threat_resolved(self.pieces, king, move):
+                print(f"danger: {self.pieces[king].danger}")
+                print(
+                    f"move step possible {self.pieces[move[0]].possible_move(self.pieces, move)}"
+                )
+                return False
+            self.moves += 1
+            if isinstance(self.pieces[move[0]], King):
+                self.black_king, self.white_king = (
+                    (self.black_king, move[1])
+                    if player_color == "white"
+                    else (move[1], self.white_king)
+                )
+            ## Make move and determine game state
+            update_board(self.pieces, move)
+            opp_king = self.black_king if player_color == "white" else self.white_king
+            if in_check(self.pieces, opp_king):
+                self.check = True
+                if checkmate(self.pieces, opp_king):
+                    self.game_over = "checkmate"
+                    return True
+            else:
+                self.check = False
+                if stalemate(self.pieces, opp_king):
+                    self.game_over = "stalemate"
+                    return True
+            return True
+        else:
+            return False
 
 
 if __name__ == "__main__":
@@ -675,3 +815,7 @@ if __name__ == "__main__":
 # 			]
 
 # print(in_check(reformat_board(ChessBoard), (7,3)))
+# new_game = game()
+# pieces = new_game.pieces
+# assert pieces[(6,2)].possible_move(pieces, ((6,2), (4,2))), "Pawn Double step is not implemented"
+# assert new_game.make_move(((6,2), (4,2))), "Pawn Double step is not implemented"
