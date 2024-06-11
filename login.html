@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      background-color: beige;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+      height:70vh;
+    }
+    header {
+      text-align: center;
+      font-size: 45px;
+      font-weight: bold;
+    }
+    button {
+      padding: 5px 10px;
+      font-size: 15px;
+    }
+    div div {
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-self: flex-start;
+    }
+    table {
+      padding: 20px;
+      border: solid grey 2px;
+      border-radius: 25px;
+    }
+    tr td {
+      font-size: 20px;
+      padding: 2px;
+    }
+    tr td:nth-child(2)>input {
+      height: 20px;
+    }
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<header>Login Page</header>
+<body>
+  <div class="container">
+    <div>
+      <h2>Have an account?</h2>
+      <form method="post" action="http://127.0.0.1:3000/login">
+        <table>
+          <tr>
+            <td><label for="user_name">Username: </label></td>
+            <td><input type="text" name="user_name" required></td>
+          </tr>
+          <tr>
+            <td><label for="password">Password: </label></td>
+            <td><input type="password" name="password" required></td>
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td><button type="submit">Login</button></td>
+          </tr>
+        </table>
+      </form>
+    </div>
+    <div>
+      <h2>Dont have an account?</h2>
+      <table>
+        <tr><td>Want to create an account?</td><td><a href="register.html"><button>Register</button></a></td></tr>
+        <tr><td>Dont want to register?</td><td><a href="guest-play.html"><button>Play as guest</button></a></td></tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
