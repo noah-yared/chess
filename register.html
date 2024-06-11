@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <style>
+    body {
+      background-color: beige;
+    }
+    header {
+      text-align: center;
+      font-size: 45px;
+      font-weight: bold;
+    }
+    .container {
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+      align-items: center;
+    }
+    table {
+      padding: 20px;
+      border: 2px solid grey;
+      border-radius: 25px;
+    }
+    tr td {
+      font-size: 20px;
+      padding: 2px;
+    }
+    tr td:nth-child(1) {
+      display: flex;
+      justify-self: flex-start;
+    }
+    tr td:nth-child(2)>input {
+      height: 20px;
+    }
+    button {
+      display: flex;
+      justify-self: flex-start; 
+      padding: 5px 10px;
+      font-size: 15px;
+    }
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<header>Registration Page</header>
+<body>
+  <div class="container">
+    <div>
+      <h2>Register</h2>
+      <form method="POST">
+        <table>
+          <tr>
+            <td><label for="user_name">Enter a username: <span style="font-size: 12px"><br>(8 to 16 characters ['a-zA-Z0-9._!#'])</span></label></td>
+            <td><input type="text" name="username" required minlength="8" maxlength="16" size="20"></td>
+          </tr>
+          <tr>
+            <td><label for="email">Enter your email: </label></td>  
+            <td><input type="email" name="email" required placeholder="user@domain"></td>
+          </tr>
+          <tr>
+            <td><label for="password">Enter a password: <span style="font-size: 12px"><br>(8 to 16 characters, <br>all characters allowed, <br>at least one special character, <br>one uppercase, one lowercase)</span></label></td>
+            <td><input type="password" name="password" required minlength="8" maxlength="16" size="20"></td>  
+          </tr>
+          <tr>
+            <td><label for="password">Confirm your password: </label></td>
+            <td><input type="password" name="password" required minlength="8" maxlength="16" size="20"></td>  
+          </tr>
+          <tr>
+            <td>&nbsp;</td>
+            <td><button type="submit">Create Account</button></td>
+          </tr>
+        </table>
+      </form>
+    </div> 
+    <div>
+      <h2>Dont want to register?</h2>
+      <table>
+        <tr><td>Already have an account?</td><td><a href="login.html"><button>Login</button></a></td></tr>
+        <tr><td>Want to play as a guest?</td><td><a href="guest-play.html"><button>Play as guest</button></a></td></tr>
+      </table>
+    </div> 
+  </div>
+</body>
+</html>
