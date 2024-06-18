@@ -1,32 +1,19 @@
 const express = require("express");
-// const bodyparser = require("body-parser");
-const authRoutes = require("./routes/auth.js");
 const { createServer } = require("http");
-const { Server } = require("socket.io");
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: "*"
-  }
-});
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const authRoutes = require("./routes/auth.js");
 app.set("view engine", "ejs");
+app.use("/auth", authRoutes);
 
-// app.post("/login", (req, res) => {
-//   console.log(req.body);
-//   res.send(req.body);
-// })
+const io = require("./routes/sockets.js")(httpServer);
 
-app.use("/login", authRoutes);
-
-io.on("connection", socket => {
-  console.log(socket.id);
-});
-
-app.listen(3000, () => {
+httpServer.listen(3000, () => {
   console.log("Listening on port 3000.");
 });
