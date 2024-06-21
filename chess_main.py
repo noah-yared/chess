@@ -552,7 +552,8 @@ def generate_king_reachable_squares(king):
         (r + dr, c + dc)
         for dr in range(-1, 2)
         for dc in range(-1, 2)
-        if in_board((r + dr, c + dc))
+        if (in_board((r + dr, c + dc)) and
+           (dr, dc) != (0,0))
     ]
 
 
