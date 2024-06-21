@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Match</title>
+  <style>
+    body {
+      background-color: bisque;
+    }
+    .main-container {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+    #chessboard {
+      display: grid;
+      grid-template: repeat(8, 75px) / repeat(8, 75px);
+      /* border-collapse: collapse; */
+      border: 5px solid black;
+    }
+    .square {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: beige;
+    }
+    img {
+      width: 75px;
+      height: 75px;
+    }
+    .square:nth-child(16n+1),
+    .square:nth-child(16n+3),
+    .square:nth-child(16n+5),
+    .square:nth-child(16n+7),
+    .square:nth-child(16n+10),
+    .square:nth-child(16n+12),
+    .square:nth-child(16n+14),
+    .square:nth-child(16n+16){
+      /* Dark squares */
+      background-color: brown;
+    }
+  </style>
+</head>
+<body>
+  <header>Searching for an opponent...</header>
+  <div class="main-container">
+    <div id="chessboard">
+      <div class="square"><img src="images/black_rook.png"/></div>
+      <div class="square"><img src="images/black_knight.png"/></div>
+      <div class="square"><img src="images/black_bishop.png"/></div>
+      <div class="square"><img src="images/black_queen.png"/></div>
+      <div class="square"><img src="images/black_king.png"/></div>
+      <div class="square"><img src="images/black_bishop.png"/></div>
+      <div class="square"><img src="images/black_knight.png"/></div>
+      <div class="square"><img src="images/black_rook.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"><img src="images/black_pawn.png"/></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_pawn.png"/></div>
+      <div class="square"><img src="images/white_rook.png"/></div>
+      <div class="square"><img src="images/white_knight.png"/></div>
+      <div class="square"><img src="images/white_bishop.png"/></div>
+      <div class="square"><img src="images/white_queen.png"/></div>
+      <div class="square"><img src="images/white_king.png"/></div>
+      <div class="square"><img src="images/white_bishop.png"/></div>
+      <div class="square"><img src="images/white_knight.png"/></div>
+      <div class="square"><img src="images/white_rook.png"/></div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io("/matchmaking"); // initialize socket
+    socket.emit("findRoom");
+    // socket.emit("getUsername", username)
+  </script>
+</body>
+</html>
