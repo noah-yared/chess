@@ -52,6 +52,9 @@ class Pawn:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return "P" if self.color == "white" else "p"
+
     def can_double_step(self, position):
         """
         Parameter(s): Takes in position of pawn
@@ -73,7 +76,6 @@ class Pawn:
         UP, DOWN = -1, 1
         dr = UP if self.color == "white" else DOWN
         (r1, c1), (r2, c2) = move
-        print("Recognize pawn double step:", (r1 + 2 * dr, c1) == (r2, c2))
         if (r2, c2) not in pieces:
             if (r1 + dr, c1) == (r2, c2) or (
                 self.can_double_step((r1, c1)) and (r1 + 2 * dr, c1) == (r2, c2)
@@ -113,6 +115,9 @@ class Knight:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return "N" if self.color == "white" else "n"
+
     def possible_move(self, pieces, move):
         if (abs(move[0][0] - move[1][0]), abs(move[0][1] - move[1][1])) not in {
             (1, 2),
@@ -150,6 +155,9 @@ class Rook:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return "R" if self.color == "white" else "r"
+
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
 
@@ -177,6 +185,9 @@ class Bishop:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return "B" if self.color == "white" else "b"
+
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
 
@@ -203,6 +214,9 @@ class Queen:
 
     def get_color(self):
         return self.color
+
+    def get_type(self):
+        return "Q" if self.color == "white" else "q"
 
     def possible_move(self, pieces, move):
         return has_line_of_sight(pieces, *move)
@@ -243,6 +257,9 @@ class King:
     def get_color(self):
         return self.color
 
+    def get_type(self):
+        return "K" if self.color == "white" else "k"
+
     def possible_move(self, pieces, move):
         if abs(move[1][0] - move[0][0]) <= 1 and abs(move[0][1] - move[1][1]) <= 1:
             if not is_same_color(pieces, *move):
@@ -270,7 +287,7 @@ class King:
         ]
 
 
-# dictionary representing possible move_directions of each piece (EXCLUDING PAWNS):
+# dictionary representing possible move_directions of each piece (EXCLUDING PAWNS/KNIGHTS):
 move_directions = {
     (1, 0): (Rook, Queen, King),
     (0, 1): (Rook, Queen, King),
@@ -340,7 +357,7 @@ def has_straight_path(square1, square2):
 def get_direction_of_line(square1, square2):
     """
     Parameter(s): Takes two positions square1, square2
-    Returns: tuple of integers (dy, dx) that describe direction of line
+    Returns: tuple of integers (dy, dx) that describe direction of STRAIGHT LINE
     between the points i.e. (0,1), (1,1), (1,-1)
     """
     r1, c1 = square1
@@ -552,8 +569,7 @@ def generate_king_reachable_squares(king):
         (r + dr, c + dc)
         for dr in range(-1, 2)
         for dc in range(-1, 2)
-        if (in_board((r + dr, c + dc)) and
-           (dr, dc) != (0,0))
+        if in_board((r + dr, c + dc))
     ]
 
 
@@ -570,6 +586,49 @@ def is_square_attacked_by_piece(pieces, piece_location, square):
     return not is_same_color(pieces, piece_location, square) and has_line_of_sight(
         pieces, piece_location, square
     )
+
+
+def is_valid_castling_move(pieces, move, castling_privileges):
+    if not isinstance(pieces[move[0]], King):
+        return False
+    castling_moves = {
+        ((7, 4), (7, 2)): "Q",
+        ((7, 4), (7, 6)): "K",
+        ((0, 4), (0, 2)): "q",
+        ((0, 4), (0, 6)): "k",
+    }
+    if castling_moves.get(move) not in castling_privileges or in_check(pieces, move[0]):
+        return False
+    print(move)
+    dc = -1 if move[0][1] > move[1][1] else 1
+    king_pos = move[0]
+    for i in range(1, 3):
+        new_king_pos = king_pos[0], king_pos[1] + i * dc
+        if new_king_pos in pieces or not is_threat_resolved(
+            pieces, king_pos, (king_pos, new_king_pos)
+        ):
+            return False
+    print("HERE")
+    return not (dc == -1 and (king_pos[0], king_pos[1] + 3 * dc) in pieces)
+
+
+def is_valid_enpassant_move(pieces, move, enpassant_squares: set):
+    if not isinstance(pieces[move[0]], Pawn):
+        return False
+    valid_directions = (
+        [(-1, 1), (-1, -1)]
+        if pieces[move[0]].get_color() == "white" and move[1][0] != 5 
+        else [(1, 1), (1, -1)]
+        if pieces[move[0]].get_color() == "black" and move[1][0] != 2
+        else []
+    )
+    return (
+        get_pawn_displacement(move) in valid_directions and move[1] in enpassant_squares
+    )
+
+
+def get_pawn_displacement(move):
+    return move[1][0] - move[0][0], move[1][1] - move[0][1]
 
 
 def update_board(pieces, move):
@@ -604,6 +663,7 @@ def can_king_evade_check(pieces, king):
             continue
         if is_threat_resolved(pieces, king, (king, square)):
             return True
+    return False
 
 
 def checkmate(pieces, king):
@@ -641,7 +701,6 @@ def checkmate(pieces, king):
                     if is_threat_resolved(pieces, king, (location, square)):
                         pieces[king].remove_danger()
                         return False
-
     return True
 
 
@@ -741,18 +800,234 @@ def stalemate(pieces, king):
 
 class game:
 
-    def __init__(self):
-        self.moves = 0
-        self.pieces = reformat_board(default_board)
+    def __init__(self, board_state):
         self.game_over = False
-        self.black_king = (0, 4)
-        self.white_king = (7, 4)
         self.check = False
+        (
+            self.piece_placement,
+            (self.pieces, self.white_king, self.black_king),
+            self.turn,
+            self.castling_privileges,
+            self.enpassant_squares,
+        ) = board_state
+        self.castled = False
+        self.enpassant = False
+        self.fen = None
+
+    def update_player_turn(self):
+        self.turn = "w" if self.turn == "b" else "b"
+
+    def update_castling_privileges(self, square):
+        if isinstance(self.pieces[square], King):
+            if square == (0, 4):
+                self.castling_privileges.discard("k")
+                self.castling_privileges.discard("q")
+            elif square == (7, 4):
+                self.castling_privileges.discard("K")
+                self.castling_privileges.discard("Q")
+
+        elif isinstance(self.pieces[square], Rook):
+            if square == (0, 0):
+                self.castling_privileges.discard("q")
+            elif square == (0, 7):
+                self.castling_privileges.discard("k")
+            elif square == (7, 0):
+                self.castling_privileges.discard("Q")
+            elif square == (7, 7):
+                self.castling_privileges.discard("K")
+
+    def update_enpassant_squares(self, move):
+        self.enpassant_squares = set()
+        if isinstance(self.pieces[move[0]], Pawn):
+            dr = -1 if self.pieces[move[0]].get_color() == "white" else 1
+            double_step = (2 * dr, 0)
+            if get_pawn_displacement(move) == double_step and self.is_enemy_piece_adjacent(move[1]):
+                self.enpassant_squares.add(self.get_enpassant_square(move))
+            # elif move[1] in self.enpassant_squares:
+            #     self.enpassant_squares.discard(move[1])
+            # elif self.was_pawn_last_move_double_step(move[0], dr):
+            #     self.enpassant_squares.discard((move[0][0] - dr, move[0][1]))
+    
+    def is_enemy_piece_adjacent(self, square):
+        r, c = square
+        adjacent_squares = [(r, c + dc) for dc in [-1,1]]
+        return any(adjacent_square in self.pieces 
+                   and not is_same_color(self.pieces, square, adjacent_square)
+                   for adjacent_square in adjacent_squares)
+
+    def get_enpassant_square(self, move):
+        return (move[0][0] + move[1][0]) // 2, move[0][1]
+
+    def was_pawn_last_move_double_step(self, square, dr):
+        return square[0] - dr, square[1] in self.enpassant_squares
+
+    def stringify_enpassant_squares(self):
+        return (
+            "".join(f"{chr(ord('a') + c)}{8-r}" for r, c in self.enpassant_squares)
+            or "-"
+        )
+
+    def stringify_castling_privileges(self):
+        return "".join(self.castling_privileges) or "-"
+
+    def stringify_piece_placement(self, move):
+        # Split the string into tokens and then jump to token describing row, find where to place,
+        # rewrite token, and join the tokens back together.
+        rows = self.piece_placement.split("/")
+
+        # Vacate intitial square with moving piece
+        start_row, start_col_index = rows[move[0][0]], move[0][1]
+        col_index, i, moved_piece = 0, 0, None
+        new_row = []
+        while i < len(start_row):
+            ch = start_row[i]
+            if col_index == start_col_index:  # Reached piece to move
+                moved_piece = ch
+                ch = '1'
+            try:
+                new_row[-1] = f"{int(new_row[-1]) + int(ch)}"
+            except (ValueError, IndexError):
+                new_row.append(ch)
+            try:
+                col_index += int(ch)
+            except ValueError:
+                col_index += 1
+            i += 1
+        rows[move[0][0]] = "".join(new_row)
+
+        assert (
+            moved_piece is not None
+        ), "Did not grab piece from starting square row. :("
+
+        # Move piece to new square
+        end_row, end_col_index = rows[move[1][0]], move[1][1]
+        col_index, i, piece_moved = 0, 0, False
+        new_row = []
+        while i < len(end_row) or not piece_moved:
+            try:
+                ch = end_row[i]
+            except IndexError:
+                ch = None
+            if col_index >= end_col_index and not piece_moved:
+                piece_moved = True
+                if end_col_index == col_index:  # Replace occupied square
+                    new_row.append(moved_piece)
+                    try:
+                        if int(ch) > 1:
+                            new_row.append(f"{int(ch) - 1}")
+                    except ValueError:
+                        pass
+                else:
+                    empty_squares_after_piece = col_index - end_col_index - 1
+                    try:
+                        new_row[-1] = f"{int(new_row[-1]) - empty_squares_after_piece - 1}"
+                    except (ValueError, IndexError):
+                        print("Caught Unexpected Error")
+                    try:
+                        if not int(new_row[-1]): 
+                            new_row[-1] = moved_piece
+                        else:
+                            new_row.append(moved_piece)
+                        if empty_squares_after_piece:
+                            new_row.append(f"{empty_squares_after_piece}")
+                        if ch is not None:
+                            new_row.append(ch)
+                    except (ValueError, IndexError):
+                        print("Caught Unexpected Error")
+            elif ch is not None:
+                new_row.append(ch)
+            try:
+                col_index += int(ch)
+            except:
+                col_index += 1
+            i += 1
+        rows[move[1][0]] = "".join(new_row)
+
+        if self.enpassant:
+            # Vacate square with pawn that is captured by enpassant
+            captured_pawn_row_index = 3 if move[1][0] == 2 else 4
+            captured_pawn_col_index = move[1][1]
+            captured_pawn_row = rows[captured_pawn_row_index]
+            col_index, i, new_row = 0, 0, []
+            while i < len(captured_pawn_row):
+                ch = captured_pawn_row[i]
+                if col_index == captured_pawn_col_index:
+                    ch = '1'
+                try:
+                    new_row[-1] = f"{int(new_row[-1]) + int(ch)}"
+                except (ValueError, IndexError):
+                    new_row.append(ch)
+                try:
+                    col_index += int(ch)
+                except ValueError:
+                    col_index += 1
+                i += 1
+            rows[captured_pawn_row_index] = "".join(new_row)
+        
+        elif self.castled:
+            # Vacate square with rook to be moved
+            castled_rook_start_col_index = 7 if move[1][1] > move[0][1] else 0
+            castled_rook_row = rows[move[0][0]]
+            col_index, i, new_row = 0, 0, []
+            while i < len(castled_rook_row):
+                ch = castled_rook_row[i]
+                if col_index == castled_rook_start_col_index:
+                    castled_rook = ch
+                    ch = '1'
+                try: 
+                    new_row[-1] = f"{int(new_row[-1]) + int(ch)}"
+                except (ValueError, IndexError):
+                    new_row.append(ch)
+                try: 
+                    col_index += int(ch)
+                except ValueError:
+                    col_index += 1
+                i += 1
+            rows[move[0][0]] = new_row
+            
+            # Move castled rook to new vacant square
+            castled_rook_end_col_index = 5 if castled_rook_start_col_index == 7 else 3
+            col_index, i, new_row, rook_moved = 0, 0, [], False
+            while i < len(castled_rook_row):
+                ch = castled_rook_row[i]
+                if col_index >= castled_rook_end_col_index and not rook_moved:
+                    rook_moved = True
+                    if col_index == castled_rook_end_col_index:
+                        new_row.append(castled_rook)
+                        try:
+                            if int(ch) > 1:
+                                new_row.append(f"{int(ch) - 1}")
+                        except ValueError:
+                            pass
+                    else:
+                        empty_squares_after_rook = col_index - castled_rook_end_col_index - 1
+                        try:
+                            empty_squares_before_rook = int(new_row[-1]) - empty_squares_after_rook - 1
+                            if empty_squares_before_rook:
+                                new_row[-1] = f"{empty_squares_before_rook}"
+                            else:
+                                new_row[-1] = castled_rook
+                            if empty_squares_after_piece:
+                                new_row.append(f"{empty_squares_after_rook}")
+                            new_row.append(ch)
+                                
+                        except (ValueError, IndexError):
+                            print("Caught Unexpected Error.")
+                else:
+                    new_row.append(ch)
+                try:
+                    col_index += int(ch)
+                except ValueError:
+                    col_index += 1
+            rows[move[0][0]] = new_row
+
+        return "/".join(rows)
 
     def make_move(self, move):
+        self.enpassant, self.castled = False, False
         player_color, king = (
             ("white", self.white_king)
-            if self.moves % 2 == 0
+            if self.turn == "w"
             else ("black", self.black_king)
         )
         if (
@@ -762,15 +1037,26 @@ class game:
             return False
         if in_board(move[1]) and not is_same_color(self.pieces, *move):
             ## Validate move
-            if not self.pieces[move[0]].possible_move(
-                self.pieces, move
-            ) or not is_threat_resolved(self.pieces, king, move):
-                print(f"danger: {self.pieces[king].danger}")
-                print(
-                    f"move step possible {self.pieces[move[0]].possible_move(self.pieces, move)}"
-                )
-                return False
-            self.moves += 1
+            if is_valid_castling_move(self.pieces, move, self.castling_privileges):
+                self.castled = True
+            elif is_valid_enpassant_move(self.pieces, move, self.enpassant_squares):
+                self.enpassant = True
+            else:
+                if not self.pieces[move[0]].possible_move(
+                    self.pieces, move
+                ) or not is_threat_resolved(self.pieces, king, move):
+                    return False
+            self.update_castling_privileges(move[0])
+            self.update_enpassant_squares(move)
+            self.update_player_turn()
+            self.fen = " ".join(
+                [
+                    self.stringify_piece_placement(move),
+                    self.turn,
+                    self.stringify_castling_privileges(),
+                    self.stringify_enpassant_squares(),
+                ]
+            )
             if isinstance(self.pieces[move[0]], King):
                 self.black_king, self.white_king = (
                     (self.black_king, move[1])
@@ -791,32 +1077,181 @@ class game:
                     self.game_over = "stalemate"
                     return True
             return True
-        else:
-            return False
+        return False
+    
+mapping = {
+        "P": Pawn("white"),
+        "p": Pawn("black"),
+        "R": Rook("white"),
+        "r": Rook("black"),
+        "B": Bishop("white"),
+        "b": Bishop("black"),
+        "N": Knight("white"),
+        "n": Knight("black"),
+        "Q": Queen("white"),
+        "q": Queen("black"),
+        "K": King("white"),
+        "k": King("black"),
+    }
 
 
 if __name__ == "__main__":
     pass
-    # king_locations = [(1, 3), (3, 4), (7, 4), (5, 6), (1, 1), (7, 7)]
-    # attacker_locations = [(4, 0), (1, 2), (3, 4), (6, 7), (7, 7), (7, 1)]
+    # ### Helper Functions ###
+    # def parse_FEN(board_fen: str) -> tuple:
+    #     tokens = board_fen.split()
+    #     return (
+    #         tokens[0],
+    #         parse_pieces(tokens[0]),
+    #         tokens[1],
+    #         parse_castling_privileges(tokens[2]),
+    #         parse_enpassant_squares(tokens[3]),
+    #     )
 
-    # for king, attack in zip(king_locations, attacker_locations):
-    #     print(get_direction_of_line(king, attack))
+    # def parse_pieces(piece_placement: str) -> tuple:
+    #     pieces = {}
+    #     for row_index, row in enumerate(piece_placement.split("/")):
+    #         col_index = 0
+    #         for ch in row:
+    #             try:
+    #                 col_index += int(ch)
+    #             except ValueError:
+    #                 if ch == "K":
+    #                     white_king = row_index, col_index
+    #                 elif ch == "k":
+    #                     black_king = row_index, col_index
+    #                 pieces[(row_index, col_index)] = mapping[ch]
+    #                 col_index += 1
+    #     return pieces, white_king, black_king
 
-    # ChessBoard = \
-# 			[
-# 				["R", "N", "B", "K", "Q", ".", "N", "R"],
-# 				["P", "P", "P", "P", "P", ".", ".", "P"],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", "B", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				[".", ".", ".", ".", ".", ".", ".", "."],
-# 				["p", "p", "p", "p", ".", "p", "p", "p"],
-# 				["r", "n", "b", "k", "q", "b", "n", "r"]
-# 			]
+    # def parse_enpassant_squares(squares: str) -> set:
+    #     if squares == "-":
+    #         return set()
+    #     return {
+    #         parse_algebraic_notation(squares[i : i + 2]) for i in range(0, len(squares), 2)
+    #     }
+    
+    # def parse_algebraic_notation(square: str) -> tuple:
+    #     return 8 - int(square[1]), ord(square[0]) - ord('a')
 
-# print(in_check(reformat_board(ChessBoard), (7,3)))
-# new_game = game()
-# pieces = new_game.pieces
-# assert pieces[(6,2)].possible_move(pieces, ((6,2), (4,2))), "Pawn Double step is not implemented"
-# assert new_game.make_move(((6,2), (4,2))), "Pawn Double step is not implemented"
+    # def parse_castling_privileges(privileges: str) -> set:
+    #     return set(privileges)
+    # #########################
+
+    # fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kqKQ -"
+    # board = parse_FEN(fen)[1][0]
+    # pieces = {location: piece.get_type() for (location, piece) in board.items()}
+    # print(pieces)
+    # print(parse_FEN(fen))
+
+
+
+    def stringify_piece_placement(piece_placement, move):
+        # Split the string into tokens and then jump to token describing row, find where to place,
+        # rewrite token, and join the tokens back together.
+        rows = piece_placement.split("/")
+        print(f"Initial rows: {rows}")
+
+        # Vacate intitial square with moving piece
+        start_row, start_col_index = rows[move[0][0]], move[0][1]
+        col_index, i, moved_piece = 0, 0, None
+        new_row = []
+        while i < len(start_row):
+            ch = start_row[i]
+            if col_index == start_col_index:  # Reached piece to move
+                moved_piece = ch
+                if new_row:
+                    try:
+                        new_row[-1] = f"{int(new_row[-1])+1}"
+                    except ValueError:
+                        new_row.append("1")
+                else:
+                    try:
+                        new_row.append(f"{1+int(start_row[1])}")
+                        i += 1
+                    except ValueError:
+                        new_row.append("1")
+            else:
+                new_row.append(ch)
+            try:
+                col_index += int(ch)
+            except ValueError:
+                col_index += 1
+            i += 1
+        rows[move[0][0]] = "".join(new_row)
+        print (f"row after remove piece to move: {new_row}")
+
+        assert (
+            moved_piece is not None
+        ), "Did not grab piece from starting square row. :("
+
+        # Move piece to new square
+        end_row, end_col_index = rows[move[1][0]], move[1][1]
+        col_index, i, piece_moved = 0, 0, False
+        new_row = []
+        while i < len(end_row) or not piece_moved:
+            try:
+                ch = end_row[i]
+            except IndexError:
+                ch = None
+            if col_index >= end_col_index and not piece_moved:
+                piece_moved = True
+                if end_col_index == col_index:  # Replace occupied square
+                    new_row.append(moved_piece)
+                    try:
+                        if int(ch) > 1:
+                            new_row.append(f"{int(ch) - 1}")
+                    except ValueError:
+                        pass
+                else:
+                    empty_squares_after_piece = col_index - end_col_index - 1
+                    try:
+                        new_row[-1] = f"{int(new_row[-1]) - empty_squares_after_piece - 1}"
+                    except (ValueError, IndexError):
+                        print("Caught Unexpected Error")
+                    try:
+                        if not int(new_row[-1]): 
+                            new_row[-1] = moved_piece
+                        else:
+                            new_row.append(moved_piece)
+                        if empty_squares_after_piece:
+                            new_row.append(f"{empty_squares_after_piece}")
+                    except (ValueError, IndexError):
+                        print("Caught Unexpected Error")
+            new_row.append(ch)
+            try:
+                col_index += int(ch)
+            except:
+                col_index += 1
+            i += 1
+        rows[move[1][0]] = "".join(new_row)
+        print (f"row after moving piece: {new_row}")
+        return "/".join(rows)
+
+    print(stringify_piece_placement("rn1qkbnr/ppp2ppp/4b3/8/8/8/PPPPQPPP/RNB1KBNR", ((1,1), (2,1))))
+
+
+    # def stringify_enpassant_squares(enpassant_squares):
+    #     for r,c in enpassant_squares:
+    #         print(8-r)
+    #     return (
+    #         "".join(f"{chr(ord('a') + c)}{8-r}" for r, c in enpassant_squares)
+    #         or "-"
+    #     )
+    
+    # def parse_algebraic_notation(square: str) -> tuple:
+    #     return 8 - int(square[1]), ord(square[0]) - ord('a')
+    
+    # def get_enpassant_squares(squares: str):
+    #     if squares == "-":
+    #             return set()
+    #     return {
+    #         parse_algebraic_notation(squares[i : i + 2]) for i in range(0, len(squares), 2)
+    #     }
+    
+    # enpassant_squares = "c5f3f2c1"
+
+    # enpassant_squares_set = get_enpassant_squares(enpassant_squares)
+
+    # print (enpassant_squares_set)
+    # print(stringify_enpassant_squares(enpassant_squares_set))
