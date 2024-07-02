@@ -168,5 +168,5 @@ const pollHasUserChosenPromotionPiece = async () => {
 }
 
 const updatePromotedPawnFEN = (move, piece_type) => {
-  throw new Error("Function not implemented.")
+  throw new Error("Function not implemented yet.")
 }
