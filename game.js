@@ -2,6 +2,7 @@ let move = null;
 let startSquare = null;
 let startSquareElement = null;
 let endSquareElement = null;
+let isProcessingMove = false;
 
 const boardTiles = document.getElementsByClassName("square");
 
@@ -16,6 +17,8 @@ let board_states = [boardFEN];
 
 for (let tile of boardTiles) {
   tile.addEventListener("click", async e => {
+    if (isProcessingMove) return;
+    console.log(tile);
     let newSquare = getBoardCoordinates(e.pageX, e.pageY);
     if (!startSquare && tile.querySelectorAll("img").length) {
       startSquare = newSquare;
@@ -27,6 +30,7 @@ for (let tile of boardTiles) {
       toggleSquareColor(startSquareElement, startSquare); // de-highlight square
     }
     if (move) {
+      isProcessingMove = true;
       validateMove(move)
         .then(result => {
           console.log("Is move valid?", result["valid"])
@@ -49,6 +53,7 @@ for (let tile of boardTiles) {
           startSquare = null;
           startSquareElement = null;
           endSquareElement = null;
+          isProcessingMove = false;
         })
     }
   })
