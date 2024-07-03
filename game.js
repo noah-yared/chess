@@ -24,11 +24,14 @@ document.addEventListener("click", (e) => {
 })
 
 for (let promotionPiece of promotionPieces) {
-  promotionPiece.addEventListener("click", (move) => {
-    let pawnToPromote = document.querySelector(`.square:nth-child(${getIndex(move) + 1})`);
+  promotionPiece.addEventListener("click", () => {
+    let pawnToPromote = document.querySelector(`.square:nth-child(${getIndex(move[1]) + 1})`);
     pawnToPromote.innerHTML = promotionPiece.innerHTML;
+    console.log("FEN before update:", boardFEN);
     updatePromotedPawnFEN(move, promotionPiece.id); // NEED TO IMPLEMENT 
-    let promotionOptionsGrid = document.getElementById("promotion-options");
+    console.log("updated FEN:", boardFEN)
+    let color = move[1][0] === 0 ? "white" : "black";
+    let promotionOptionsGrid = document.getElementById(`promotion-options-${color}`);
     promotionOptionsGrid.style.display = "none";
     hasUserChosenPromotionPiece = true;
   })
@@ -55,6 +58,10 @@ for (let tile of boardTiles) {
           console.log("Is move valid?", result["valid"])
           if (result["valid"]) {
             makeMove(startSquareElement, endSquareElement)
+            boardFEN = result.fen;
+            console.log("Board state", boardFEN)
+            moves.push(move); // push move into list of moves
+            board_states.push(boardFEN); // store board state
             if (result["enpassant"]) {
               handleEnpassantMove(move);
             } else if (result["castled"]) {
@@ -64,10 +71,6 @@ for (let tile of boardTiles) {
               handlePawnPromotion(move);
               await pollHasUserChosenPromotionPiece();
             }
-            boardFEN = result.fen;
-            console.log("Board state", boardFEN)
-            moves.push(move); // push move into list of moves
-            board_states.push(boardFEN); // store board state
           } 
         })
         .catch(err => console.error(`Something went wrong with move validation. Here is the error: ${err}`))
@@ -123,20 +126,25 @@ const handleCastledMove = (move) => {
 
 const handlePawnPromotion = (move) => {
   let pawnFinalIndex = getIndex(move[1]);
-  let promotionOptionsElement = document.getElementById("promotion-options");
+  let color = move[1][0] === 0 ? "white" : "black";
+  let promotionOptionsElement = document.getElementById(`promotion-options-${color}`);
   promotionOptionsElement.style.display = "grid"; 
   promotionOptionsElement.style.position = "absolute";
-  let finalSquareRect = document.querySelector(`square:nth-child(${pawnFinalIndex + 1})`);
+  let finalSquareRect = document.querySelector(`.square:nth-child(${pawnFinalIndex + 1})`).getBoundingClientRect();
+  console.log(finalSquareRect);
+  let width = promotionOptionsElement.offsetWidth;
   if (move[1][1] < 4) {
-    promotionOptionsElement.style.left = `${finalSquareRect.left}`;
+    promotionOptionsElement.style.left = `${finalSquareRect.left + window.scrollX}px`;
   } else {
-    promotionOptionsElement.style.right = `${finalSquareRect.right}`;  
+    promotionOptionsElement.style.left = `${finalSquareRect.right + window.scrollX - width}px`; 
   }
+  let height = promotionOptionsElement.offsetHeight;
   if (move[1][0] === 0) {
-    promotionOptionsElement.style.top = `${finalSquareRect.bottom}`;
+    promotionOptionsElement.style.top = `${finalSquareRect.bottom + window.scrollY}px`;
   } else {
-    promotionOptionsElement.style.bottom = `${finalSquareRect.top}`;
+    promotionOptionsElement.style.top = `${finalSquareRect.top + window.scrollY - height}px`;
   }
+  console.log('Computed Style:', getComputedStyle(promotionOptionsElement));
 }
 
 const getIndex = (square) => {
@@ -168,5 +176,39 @@ const pollHasUserChosenPromotionPiece = async () => {
 }
 
 const updatePromotedPawnFEN = (move, piece_type) => {
-  throw new Error("Function not implemented yet.")
+  console.log("piece to replace with:", piece_type);
+  let colIndex = 0, pawnColIndex = move[1][1];
+  if (move[1][0] === 0) {
+    // iterate until we get to first backwards slash
+    let i = 0;
+    while (boardFEN[i] != '/') {
+      if (colIndex === pawnColIndex) {
+        boardFEN = boardFEN.substring(0, i) + piece_type + boardFEN.substring(i+1);
+        console.log(boardFEN[i]);
+        break; // just need to replace piece
+      } 
+      if (!isNaN(Number(boardFEN[i]))) {
+        colIndex += Number(boardFEN[i]);
+      } else{
+        colIndex++;
+      }
+      i++;
+    }
+  } else {
+    // find index of last backwards slash and iterate until first space
+    let i = boardFEN.lastIndexOf('/') + 1;
+    while (boardFEN[i] != ' ') {
+      if (colIndex === pawnColIndex) {
+        boardFEN = boardFEN.substring(0, i) + piece_type + boardFEN.substring(i+1);
+        console.log(boardFEN[i]);
+        break;
+      }
+      if (!isNaN(Number(boardFEN[i]))) {
+        colIndex += Number(boardFEN[i]);
+      } else {
+        colIndex++;
+      }
+      i++;
+    }
+  }
 }
