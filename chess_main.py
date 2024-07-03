@@ -634,6 +634,12 @@ def get_pawn_displacement(move):
     return move[1][0] - move[0][0], move[1][1] - move[0][1]
 
 
+def is_pawn_promoting(pieces, move):
+    if not isinstance(pieces[move[0]], Pawn):
+        return False
+    return move[1][0] == 0 if pieces[move[0]].get_color() == "white" else move[1][0] == 7
+
+
 # def update_board(pieces, move):
 #     """
 #     Parameter(s): Takes current board state, validated move (coordinate tuple (square1, square2))
@@ -846,10 +852,6 @@ class game:
             double_step = (2 * dr, 0)
             if get_pawn_displacement(move) == double_step and self.is_enemy_piece_adjacent(move[1]):
                 self.enpassant_squares.add(self.get_enpassant_square(move))
-            # elif move[1] in self.enpassant_squares:
-            #     self.enpassant_squares.discard(move[1])
-            # elif self.was_pawn_last_move_double_step(move[0], dr):
-            #     self.enpassant_squares.discard((move[0][0] - dr, move[0][1]))
     
     def is_enemy_piece_adjacent(self, square):
         r, c = square
@@ -860,9 +862,6 @@ class game:
 
     def get_enpassant_square(self, move):
         return (move[0][0] + move[1][0]) // 2, move[0][1]
-
-    def was_pawn_last_move_double_step(self, square, dr):
-        return square[0] - dr, square[1] in self.enpassant_squares
 
     def stringify_enpassant_squares(self):
         return (
@@ -1035,7 +1034,7 @@ class game:
         return "/".join(rows)
 
     def make_move(self, move):
-        self.enpassant, self.castled = False, False
+        self.enpassant, self.castled, self.promotion = False, False, False
         player_color, king = (
             ("white", self.white_king)
             if self.turn == "w"
@@ -1058,6 +1057,9 @@ class game:
                     self.pieces, move
                 ) or not is_threat_resolved(self.pieces, king, move):
                     return False
+                if isinstance(self.pieces[move[0]], Pawn):
+                    if is_pawn_promoting(self.pieces, move):
+                        self.promotion = True
             # if self.castled: print("MADE IT PAST")
             self.update_castling_privileges(move[0])
             self.update_enpassant_squares(move)
