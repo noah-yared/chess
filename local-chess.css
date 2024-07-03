@@ -121,3 +121,23 @@ body {
   grid-template-columns: repeat(3, 60px);
   grid-template-rows: repeat(5, 60px);
 }
+
+#promotion-options-white,
+#promotion-options-black {
+  display: none;
+  width: 152px;
+  grid-template: repeat(2, 76px) / repeat(2, 76px);
+}
+
+.promotion-piece {
+  display: flex;
+  background-color: lightblue;
+  box-sizing: border-box;
+  border: 1px solid black;
+  justify-self: center;
+  align-self: center;
+}
+
+.promotion-piece:hover {
+  background-color: skyblue;
+}
