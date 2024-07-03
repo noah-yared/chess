@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Local Chess</title>
     <link rel="stylesheet" href="local-chess.css"/>
-    <script src="localChess.js" defer></script>
+    <script src="game.js" defer></script>
   </head>
   <body>
     <button type="button" id="theme"><img src="images/theme.png" height="30" width="30">Change Theme</button>
@@ -145,6 +145,23 @@
         <div class="captured-black-piece"></div>
       </div>
     </div>
+    <div class="promotion-options" id="promotion-options-white">
+      <div class="promotion-piece" id="Q"><img src="images/white_queen.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="R"><img src="images/white_rook.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="N"><img src="images/white_knight.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="B"><img src="images/white_bishop.png" alt="" height="75" width="75"></div>
+    </div>
+    <div class="promotion-options" id="promotion-options-black">
+      <div class="promotion-piece" id="q"><img src="images/black_queen.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="r"><img src="images/black_rook.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="n"><img src="images/black_knight.png" alt="" height="75" width="75"></div>
+      <div class="promotion-piece" id="b"><img src="images/black_bishop.png" alt="" height="75" width="75"></div>
+    </div>
+    <audio id="move-audio" src="images/move.mp3"></audio>
+    <audio id="capture-audio" src="images/capture.mp3"></audio>
+    <audio id="incorrect-audio" src="images/incorrect.mp3"></audio>
+    <audio id="check-audio" src="images/check.mp3"></audio>
+    <audio id="start-audio" src="images/start.mp3"></audio>
+    <audio id="game-over-audio" src="images/game-over.mp3"></audio>
   </body>
-
 </html>
