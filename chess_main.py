@@ -1183,20 +1183,20 @@ if __name__ == "__main__":
         # print(parse_FEN(fen))
 
         # def stringify_enpassant_squares(enpassant_squares):
-        for r, c in enpassant_squares:
-            print(8 - r)
-        return "".join(f"{chr(ord('a') + c)}{8-r}" for r, c in enpassant_squares) or "-"
+        # for r, c in enpassant_squares:
+        #     print(8 - r)
+        # return "".join(f"{chr(ord('a') + c)}{8-r}" for r, c in enpassant_squares) or "-"
 
         # def parse_algebraic_notation(square: str) -> tuple:
-        return 8 - int(square[1]), ord(square[0]) - ord("a")
+        # return 8 - int(square[1]), ord(square[0]) - ord("a")
 
         # def get_enpassant_squares(squares: str):
-        if squares == "-":
-            return set()
-        return {
-            parse_algebraic_notation(squares[i : i + 2])
-            for i in range(0, len(squares), 2)
-        }
+        # if squares == "-":
+        #     return set()
+        # return {
+        #     parse_algebraic_notation(squares[i : i + 2])
+        #     for i in range(0, len(squares), 2)
+        # }
 
     # enpassant_squares = "c5f3f2c1"
 
