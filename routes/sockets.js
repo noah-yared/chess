@@ -11,37 +11,70 @@ module.exports = (server) => {
   const matchmaking = io.of("/matchmaking");
   const customRoom = io.of("/customRoom");
 
-  const matchmakingConnections = {};
-  const customRoomConnections = {};
-  const customRooms = {};
   const sockets = {};
+
+  const matchmakingConnections = {};
   const openMatchmakingRooms = [];
 
+  const customRoomConnections = {};
+  const customRooms = {};
+
+  const generateSide = () => Math.random() < 0.5 ? "white" : "black";
+
+  const assignSides = (socket1, socket2) =>  {
+    let socket1Color = generateSide();
+    let socket2Color = socket1Color === "white" ? "black" : "white";
+    socket1.emit("color", socket1Color);
+    socket2.emit("color", socket2Color);
+  } 
+
+  const storeMatchmakingConnection = (socket1, socket2, room) => {
+    matchmakingConnections[sockets[socket1.id]] = { "room": room, "opponent": sockets[socket2.id] };
+    matchmakingConnections[sockets[socket2.id]] = { "room": room, "opponent": sockets[socket1.id] };
+  }
+
+  const startGame = (socket1, socket2) => {
+    socket1.emit("startGame");
+    socket2.emit("startGame");
+  }
+
   let existingRoom, newRoom;
+  let waitingSocket = null;
   matchmaking.on("connection", (socket) => {
-    socket.on("findRoom", () => {
+    socket.on("findRoom", async () => {
       // assign room to user
-      if (!openMatchmakingRooms.length) {
-        // generate UUID for room
-        newRoom = randomUUID();
-        socket.join(newRoom);
-        openMatchmakingRooms.push(newRoom);
+      if (!waitingSocket) {
+        waitingSocket = socket;
+        console.log(`${sockets[waitingSocket.id]} is waiting for an available room.`);
       } else {
-        // TODO: implement skill-based matchmaking as needed
-        existingRoom = openMatchmakingRooms.pop();
-        socket.join(existingRoom);
-      }      
+        newRoom = randomUUID();
+        waitingSocket.join(newRoom); console.log(`${sockets[waitingSocket.id]} joined ${newRoom}`);
+        socket.join(newRoom); console.log(`${sockets[socket.id]} joined ${newRoom}`);
+        assignSides(waitingSocket, socket);
+        storeMatchmakingConnection(waitingSocket, socket, newRoom);
+        matchmaking.to(newRoom).emit("startGame");
+        console.log('Sockets in newRoom:', matchmaking.adapter.rooms.get(newRoom));
+        console.log("startGame event emitted!");
+        // startGame(waitingSocket, socket);
+      }
     });
+    socket.on("disconnect", () => {
+      console.log(`${sockets[socket.id]} disconnected from the room.`)
+    })
     socket.on("getUsername", (username) => {
+      console.log(`Got username! Username is ${username}`);
       sockets[socket.id] = username; // store socket.id-user connection
-      matchmakingConnections[username] = room; // store user-room connection
     });
     socket.on("move", (moveInfo) => {
-      const room = matchmakingConnections[sockets[socket.id]];
-      matchmaking.to(room).emit("displayMove", moveInfo);
+      console.log("caught the emitted move event! now broadcasting for display!")
+      let room = matchmakingConnections[sockets[socket.id]].room;
+      socket.to(room).emit("displayMove", moveInfo);
     });
     socket.on("gameOver", () => {
-      delete matchmakingConnections[sockets[socket.id]];
+      let onlineRoom  = matchmakingConnections[sockets[socket.id]];
+      console.log(`Opponent is ${onlineRoom.opponent}`);
+      matchmaking.to(onlineRoom.room).emit("gameOver");
+      delete onlineRoom;
     }) 
   });
 
